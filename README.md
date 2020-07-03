@@ -72,11 +72,11 @@ When doing requests, it's good to know that:
 - For PUT requests any `id` value in the body will be ignored, as id values are not mutable.
 
 ## Parameters
-- You can specify an alternative port with the flag `-p` or `--port`.
+- You can specify an alternative port with the flag `-p` or `--port`. Default value is `8080`.
 
 `go run main.go -p 8090`
 
-- You can specify an alternative file with the flag `-f` or `--file`.
+- You can specify an alternative file with the flag `-f` or `--file`. Default value is `db.json`.
 
 `go run main.go -f example.json`
 
