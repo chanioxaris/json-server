@@ -31,7 +31,7 @@ Create a `db.json` file with your desired data
            "title": "Crime and punishment",
            "published": 1866,
            "author": "Fyodor Dostoevsky"
-         },
+         }
        ],
       "version": 1
     }
