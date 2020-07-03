@@ -9,39 +9,47 @@ import (
 
 // Storage implements the service interface.
 type Storage struct {
-	File     string
-	Key      string
-	Singular bool
+	file     string
+	key      string
+	singular bool
 }
 
 // NewStorage returns a new storage instance.
-func NewStorage(file, key string, single bool) (*Storage, error) {
-	return &Storage{File: file, Key: key, Singular: single}, nil
+func NewStorage(file, key string, singular bool) (*Storage, error) {
+	return &Storage{file: file, key: key, singular: singular}, nil
 }
 
 // Find all resources for the specific key.
 func (s *Storage) Find() ([]Resource, error) {
-	data, err := readFile(s.File)
+	data, err := readFile(s.file)
 	if err != nil {
 		return nil, err
 	}
 
-	return data[s.Key].([]Resource), nil
+	if err = checkResourceKeyExists(data, s.key); err != nil {
+		return nil, ErrResourceNotFound
+	}
+
+	return data[s.key].([]Resource), nil
 }
 
 // FindById a resource for the specific key.
 func (s *Storage) FindById(id string) (Resource, error) {
-	data, err := readFile(s.File)
+	data, err := readFile(s.file)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if singular endpoint and construct the resource to be returned.
-	if s.Singular {
-		return Resource{s.Key: data[s.Key]}, nil
+	if err = checkResourceKeyExists(data, s.key); err != nil {
+		return nil, ErrResourceNotFound
 	}
 
-	for _, resource := range data[s.Key].([]Resource) {
+	// Check if singular endpoint and construct the resource to be returned.
+	if s.singular {
+		return Resource{s.key: data[s.key]}, nil
+	}
+
+	for _, resource := range data[s.key].([]Resource) {
 		if resource["id"] == id {
 			return resource, nil
 		}
@@ -52,26 +60,30 @@ func (s *Storage) FindById(id string) (Resource, error) {
 
 // Create a new resource for the specific key.
 func (s *Storage) Create(newResource Resource) (Resource, error) {
-	data, err := readFile(s.File)
+	data, err := readFile(s.file)
 	if err != nil {
 		return nil, err
 	}
 
+	if err = checkResourceKeyExists(data, s.key); err != nil {
+		return nil, ErrResourceNotFound
+	}
+
 	_, ok := newResource["id"]
 	if !ok {
-		newResource["id"] = generateNewId(data[s.Key].([]Resource))
+		newResource["id"] = generateNewId(data[s.key].([]Resource))
 	} else {
-		for _, resource := range data[s.Key].([]Resource) {
+		for _, resource := range data[s.key].([]Resource) {
 			if resource["id"] == newResource["id"] {
 				return nil, ErrResourceAlreadyExists
 			}
 		}
 	}
 
-	newData := append(data[s.Key].([]Resource), newResource)
-	data[s.Key] = newData
+	newData := append(data[s.key].([]Resource), newResource)
+	data[s.key] = newData
 
-	if err := updateFile(s.File, data); err != nil {
+	if err := updateFile(s.file, data); err != nil {
 		return nil, err
 	}
 
@@ -80,15 +92,19 @@ func (s *Storage) Create(newResource Resource) (Resource, error) {
 
 // Update an existing resource for the specific key.
 func (s *Storage) Update(id string, updatedResource Resource) (Resource, error) {
-	data, err := readFile(s.File)
+	data, err := readFile(s.file)
 	if err != nil {
 		return nil, err
+	}
+
+	if err = checkResourceKeyExists(data, s.key); err != nil {
+		return nil, ErrResourceNotFound
 	}
 
 	updatedResource["id"] = id
 
 	newResources := make([]Resource, 0)
-	for _, d := range data[s.Key].([]Resource) {
+	for _, d := range data[s.key].([]Resource) {
 		if d["id"] == id {
 			newResources = append(newResources, updatedResource)
 		} else {
@@ -96,9 +112,9 @@ func (s *Storage) Update(id string, updatedResource Resource) (Resource, error) 
 		}
 	}
 
-	data[s.Key] = newResources
+	data[s.key] = newResources
 
-	if err := updateFile(s.File, data); err != nil {
+	if err := updateFile(s.file, data); err != nil {
 		return nil, err
 	}
 
@@ -107,13 +123,17 @@ func (s *Storage) Update(id string, updatedResource Resource) (Resource, error) 
 
 // Delete an existing resource for the specific key.
 func (s *Storage) Delete(id string) error {
-	data, err := readFile(s.File)
+	data, err := readFile(s.file)
 	if err != nil {
 		return err
 	}
 
+	if err = checkResourceKeyExists(data, s.key); err != nil {
+		return ErrResourceNotFound
+	}
+
 	newResources := make([]Resource, 0)
-	for _, d := range data[s.Key].([]Resource) {
+	for _, d := range data[s.key].([]Resource) {
 		if d["id"] == id {
 			continue
 		}
@@ -121,9 +141,9 @@ func (s *Storage) Delete(id string) error {
 		newResources = append(newResources, d)
 	}
 
-	data[s.Key] = newResources
+	data[s.key] = newResources
 
-	return updateFile(s.File, data)
+	return updateFile(s.file, data)
 }
 
 // readFile returns all the data from the watch file.
@@ -195,4 +215,13 @@ func generateNewId(data []Resource) string {
 			return newId
 		}
 	}
+}
+
+// checkResourceKeyExists in the file data.
+func checkResourceKeyExists(data map[string]interface{}, key string) error {
+	if _, ok := data[key]; !ok {
+		return ErrResourceNotFound
+	}
+
+	return nil
 }
