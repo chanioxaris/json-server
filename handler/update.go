@@ -17,18 +17,6 @@ func Update(storageSvc storage.Service) http.HandlerFunc {
 		// Read request path parameter id.
 		id := mux.Vars(r)["id"]
 
-		// Check if resource with the requested id exists.
-		if _, err := storageSvc.FindById(id); err != nil {
-			// Resource not found.
-			if errors.Is(err, storage.ErrResourceNotFound) {
-				web.Error(w, http.StatusNotFound, err.Error())
-				return
-			}
-
-			web.Error(w, http.StatusInternalServerError, "internal Server Error")
-			return
-		}
-
 		// Read and decode request body.
 		var newResource storage.Resource
 		if err := json.NewDecoder(r.Body).Decode(&newResource); err != nil {
@@ -45,6 +33,12 @@ func Update(storageSvc storage.Service) http.HandlerFunc {
 		// Update the resource.
 		data, err := storageSvc.Update(id, newResource)
 		if err != nil {
+			// Resource not found.
+			if errors.Is(err, storage.ErrResourceNotFound) {
+				web.Error(w, http.StatusNotFound, err.Error())
+				return
+			}
+
 			web.Error(w, http.StatusInternalServerError, "internal Server Error")
 			return
 		}

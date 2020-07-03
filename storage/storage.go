@@ -101,6 +101,11 @@ func (s *Storage) Update(id string, updatedResource Resource) (Resource, error) 
 		return nil, ErrResourceNotFound
 	}
 
+	// Check if resource with the requested id exists.
+	if _, err = s.FindById(id); err != nil {
+		return nil, err
+	}
+
 	updatedResource["id"] = id
 
 	newResources := make([]Resource, 0)
@@ -130,6 +135,11 @@ func (s *Storage) Delete(id string) error {
 
 	if err = checkResourceKeyExists(data, s.key); err != nil {
 		return ErrResourceNotFound
+	}
+
+	// Check if resource with the requested id exists.
+	if _, err = s.FindById(id); err != nil {
+		return err
 	}
 
 	newResources := make([]Resource, 0)

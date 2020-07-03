@@ -16,20 +16,14 @@ func Delete(storageSvc storage.Service) http.HandlerFunc {
 		// Read request path parameter id.
 		id := mux.Vars(r)["id"]
 
-		// Check if resource with the requested id exists.
-		if _, err := storageSvc.FindById(id); err != nil {
+		// Delete resource.
+		if err := storageSvc.Delete(id); err != nil {
 			// Resource not found.
 			if errors.Is(err, storage.ErrResourceNotFound) {
 				web.Error(w, http.StatusNotFound, err.Error())
 				return
 			}
 
-			web.Error(w, http.StatusInternalServerError, "internal Server Error")
-			return
-		}
-
-		// Delete resource.
-		if err := storageSvc.Delete(id); err != nil {
 			web.Error(w, http.StatusInternalServerError, "internal Server Error")
 			return
 		}
