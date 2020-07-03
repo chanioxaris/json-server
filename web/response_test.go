@@ -61,7 +61,7 @@ func TestSuccess(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !(reflect.DeepEqual(respBody, tt.data)) {
+			if !reflect.DeepEqual(respBody, tt.data) {
 				t.Fatalf("expected body %v, but got %v", tt.data, respBody)
 			}
 		}
