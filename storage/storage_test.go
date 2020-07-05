@@ -114,7 +114,7 @@ func TestFindById(t *testing.T) {
 	randomKeyIndex := rand.Intn(len(keys))
 	randomKey := keys[randomKeyIndex]
 
-	randomResourceIndex := rand.Intn(10)
+	randomResourceIndex := rand.Intn(len(testData[randomKey]))
 	randomResource := testData[randomKey][randomResourceIndex]
 
 	type args struct {
@@ -206,7 +206,7 @@ func TestCreate(t *testing.T) {
 	randomKeyIndex := rand.Intn(len(keys))
 	randomKey := keys[randomKeyIndex]
 
-	randomResourceIndex := rand.Intn(10)
+	randomResourceIndex := rand.Intn(len(testData[randomKey]))
 	randomResource := testData[randomKey][randomResourceIndex]
 
 	type args struct {
@@ -332,7 +332,7 @@ func TestUpdate(t *testing.T) {
 	randomKeyIndex := rand.Intn(len(keys))
 	randomKey := keys[randomKeyIndex]
 
-	randomResourceIndex := rand.Intn(10)
+	randomResourceIndex := rand.Intn(len(testData[randomKey]))
 	randomResource := testData[randomKey][randomResourceIndex]
 
 	type args struct {
@@ -462,7 +462,7 @@ func TestDelete(t *testing.T) {
 	randomKeyIndex := rand.Intn(len(keys))
 	randomKey := keys[randomKeyIndex]
 
-	randomResourceIndex := rand.Intn(10)
+	randomResourceIndex := rand.Intn(len(testData[randomKey]))
 	randomResource := testData[randomKey][randomResourceIndex]
 
 	type args struct {
@@ -575,7 +575,7 @@ func testGenerateStorageFile() (*os.File, error) {
 func testGenerateData() ([]byte, error) {
 	for _, key := range keys {
 		resources := make([]storage.Resource, 0)
-		for idx := 0; idx < 10; idx++ {
+		for idx := 0; idx < rand.Intn(10)+1; idx++ {
 			newResource := storage.Resource{
 				"id":          strconv.Itoa(idx),
 				"description": fmt.Sprintf("description-%s-%d", key, idx),
