@@ -230,7 +230,7 @@ func TestCreate(t *testing.T) {
 			},
 			resource: storage.Resource{
 				"id":          "2020",
-				"description": "test-description",
+				"description": "new-description",
 			},
 		},
 		{
