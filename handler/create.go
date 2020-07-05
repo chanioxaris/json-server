@@ -15,13 +15,13 @@ func Create(storageSvc storage.Service) http.HandlerFunc {
 		// Read and decode request body.
 		var newResource storage.Resource
 		if err := json.NewDecoder(r.Body).Decode(&newResource); err != nil {
-			web.Error(w, http.StatusBadRequest, "bad request")
+			web.Error(w, http.StatusBadRequest, storage.ErrBadRequest.Error())
 			return
 		}
 
 		// Check if request body is empty, or contains only id.
 		if _, ok := newResource["id"]; len(newResource) == 0 || (len(newResource) == 1 && ok) {
-			web.Error(w, http.StatusBadRequest, "bad request")
+			web.Error(w, http.StatusBadRequest, storage.ErrBadRequest.Error())
 			return
 		}
 
@@ -34,7 +34,7 @@ func Create(storageSvc storage.Service) http.HandlerFunc {
 				return
 			}
 
-			web.Error(w, http.StatusInternalServerError, "internal Server Error")
+			web.Error(w, http.StatusInternalServerError, storage.ErrInternalServerError.Error())
 			return
 		}
 

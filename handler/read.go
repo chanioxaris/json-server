@@ -25,7 +25,7 @@ func Read(storageSvc storage.Service) http.HandlerFunc {
 				return
 			}
 
-			web.Error(w, http.StatusInternalServerError, "internal Server Error")
+			web.Error(w, http.StatusInternalServerError, storage.ErrInternalServerError.Error())
 			return
 		}
 

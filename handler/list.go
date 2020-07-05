@@ -13,7 +13,7 @@ func List(storageSvc storage.Service) http.HandlerFunc {
 		// Find all resources.
 		data, err := storageSvc.Find()
 		if err != nil {
-			web.Error(w, http.StatusInternalServerError, "internal Server Error")
+			web.Error(w, http.StatusInternalServerError, storage.ErrInternalServerError.Error())
 			return
 		}
 

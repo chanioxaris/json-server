@@ -28,6 +28,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"reflect"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -87,7 +88,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Setup router.
-	router, err := setupRouter(content, file)
+	router, err := SetupRouter(content, file)
 	if err != nil {
 		return err
 	}
@@ -104,14 +105,14 @@ func run(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-func setupRouter(content map[string]interface{}, file string) (http.Handler, error) {
+func SetupRouter(content map[string]interface{}, file string) (http.Handler, error) {
 	router := mux.NewRouter().StrictSlash(true)
 
 	// For each resource create the appropriate endpoint handlers.
 	for key, val := range content {
-		switch val.(type) {
+		switch reflect.TypeOf(val).Kind() {
 		// If there is an array, register all default endpoint handlers.
-		case []interface{}:
+		case reflect.Slice:
 			// Create storage service to access the 'database' for specific resource.
 			storageSvc, err := storage.NewStorage(file, key, false)
 			if err != nil {
