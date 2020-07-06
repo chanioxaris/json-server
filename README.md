@@ -1,8 +1,6 @@
 # JSON Server
 
-Create a fake REST API from a json file with zero coding in seconds.
-
-Inspired from the [json-server](https://github.com/typicode/json-server) javascript project.
+Create a dummy REST API from a json file with zero coding in seconds. Inspired from [json-server](https://github.com/typicode/json-server) javascript package.
 
 ## Getting started
 Get the package

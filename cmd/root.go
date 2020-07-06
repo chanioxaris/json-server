@@ -41,9 +41,12 @@ import (
 // rootCmd represents the base command when called without any sub commands.
 var rootCmd = &cobra.Command{
 	Use:   "json-server",
-	Short: "Short description",
-	Long:  `Long description`,
-	RunE:  run,
+	Short: "Create a dummy REST API from a json file with zero coding within seconds",
+	Long: `json-server is a cross-platform CLI tool to create within seconds a dummy REST API from a provided json 
+			file. Depending on the provided file some default http endpoints are created. For array data (plural) a GET, 
+			GET by ID, POST, PUT by ID, PATCH by ID and DELETE by ID endpoints are available. For object data (singular) 
+			a GET endpoint is available`,
+	RunE: run,
 }
 
 func init() {
