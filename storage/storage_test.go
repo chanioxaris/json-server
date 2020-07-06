@@ -379,7 +379,7 @@ func TestReplace(t *testing.T) {
 			id: randomResource["id"].(string),
 		},
 		{
-			name: "Replace invalid resource with non existing id",
+			name: "Replace resource with non existing id",
 			args: args{
 				key:      randomKey,
 				singular: false,
@@ -442,6 +442,138 @@ func TestReplace(t *testing.T) {
 
 			expectedTestData := testData[randomKey]
 			expectedTestData[randomResourceIndex] = tt.resource
+
+			if len(currData) != len(expectedTestData) {
+				t.Fatalf("expected data length %v, but got %v", len(expectedTestData), len(currData))
+			}
+
+			if !reflect.DeepEqual(currData, expectedTestData) {
+				t.Fatalf("expected data %v, but got %v", expectedTestData, currData)
+			}
+		} else {
+			if err == nil || !errors.Is(err, tt.err) {
+				t.Fatalf("expected error %v, but got %v", tt.err, err)
+			}
+		}
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	f, err := testGenerateStorageFile()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(f.Name())
+
+	randomKeyIndex := rand.Intn(len(keys))
+	randomKey := keys[randomKeyIndex]
+
+	randomResourceIndex := rand.Intn(len(testData[randomKey]))
+	randomResource := testData[randomKey][randomResourceIndex]
+
+	type args struct {
+		key      string
+		singular bool
+		filename string
+	}
+	testCases := []struct {
+		name     string
+		args     args
+		id       string
+		resource storage.Resource
+		wantErr  bool
+		err      error
+	}{
+		{
+			name: "Update resource without id provided",
+			args: args{
+				key:      randomKey,
+				singular: false,
+				filename: f.Name(),
+			},
+			resource: storage.Resource{
+				"field_2": "replaced-field_2",
+			},
+			id: randomResource["id"].(string),
+		},
+		{
+			name: "Update resource with id provided",
+			args: args{
+				key:      randomKey,
+				singular: false,
+				filename: f.Name(),
+			},
+			resource: storage.Resource{
+				"id":      "2020",
+				"field_1": "replaced-field_1",
+			},
+			id: randomResource["id"].(string),
+		},
+		{
+			name: "Update resource with non existing id",
+			args: args{
+				key:      randomKey,
+				singular: false,
+				filename: f.Name(),
+			},
+			resource: storage.Resource{
+				"field_1": "replaced-field_1",
+			},
+			id:      "2020",
+			wantErr: true,
+			err:     storage.ErrResourceNotFound,
+		},
+		{
+			name: "Update resource of invalid resource key",
+			args: args{
+				key:      "randomKey",
+				singular: false,
+				filename: f.Name(),
+			},
+			wantErr: true,
+			err:     storage.ErrResourceNotFound,
+		},
+		{
+			name: "Update resource of invalid file name",
+			args: args{
+				key:      randomKey,
+				singular: false,
+				filename: "randomFileName",
+			},
+			wantErr: true,
+			err:     os.ErrNotExist,
+		},
+	}
+
+	for _, tt := range testCases {
+		if err := testResetData(f.Name()); err != nil {
+			t.Fatal(err)
+		}
+
+		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key, tt.args.singular)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got, err := storageSvc.Update(tt.id, tt.resource)
+		if err != nil && !tt.wantErr {
+			t.Fatal(err)
+		}
+
+		if !tt.wantErr {
+			for key, val := range tt.resource {
+				if got[key] != val && key != "id" {
+					t.Fatalf("expected updated field %s to have value %v, but got %v", key, tt.resource[key], got[key])
+				}
+			}
+
+			currData, err := storageSvc.Find()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			expectedTestData := testData[randomKey]
+			expectedTestData[randomResourceIndex] = got
 
 			if len(currData) != len(expectedTestData) {
 				t.Fatalf("expected data length %v, but got %v", len(expectedTestData), len(currData))

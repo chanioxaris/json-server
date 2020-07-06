@@ -126,6 +126,48 @@ func (s *Storage) Replace(id string, replaced Resource) (Resource, error) {
 	return replaced, nil
 }
 
+// Update an existing resource for the specific key.
+func (s *Storage) Update(id string, updatedReq Resource) (Resource, error) {
+	data, err := readFile(s.file)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = checkResourceKeyExists(data, s.key); err != nil {
+		return nil, ErrResourceNotFound
+	}
+
+	// Check if resource with the requested id exists and retrieve it.
+	updated, err := s.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Apply any changes to current resource.
+	for key, val := range updatedReq {
+		updated[key] = val
+	}
+
+	updated["id"] = id
+
+	newResources := make([]Resource, 0)
+	for _, d := range data[s.key].([]Resource) {
+		if d["id"] == id {
+			newResources = append(newResources, updated)
+		} else {
+			newResources = append(newResources, d)
+		}
+	}
+
+	data[s.key] = newResources
+
+	if err := updateFile(s.file, data); err != nil {
+		return nil, err
+	}
+
+	return updated, nil
+}
+
 // Delete an existing resource for the specific key.
 func (s *Storage) Delete(id string) error {
 	data, err := readFile(s.file)

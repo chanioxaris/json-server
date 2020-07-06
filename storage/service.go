@@ -24,5 +24,6 @@ type Service interface {
 	FindById(string) (Resource, error)
 	Create(Resource) (Resource, error)
 	Replace(string, Resource) (Resource, error)
+	Update(string, Resource) (Resource, error)
 	Delete(string) error
 }
