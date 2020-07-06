@@ -48,7 +48,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	// Optional flag to set the server port.
-	rootCmd.Flags().StringP("port", "p", "8080", "Port the server will listen to")
+	rootCmd.Flags().StringP("port", "p", "3000", "Port the server will listen to")
 	// Optional flag to set the watch file.
 	rootCmd.Flags().StringP("file", "f", "db.json", "File to watch")
 }
