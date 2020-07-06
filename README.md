@@ -71,6 +71,7 @@ When doing requests, it's good to know that:
 - For POST requests any `id` value in the body will be honored, but only if not already taken.
 - For POST requests without `id` value in the body, a new one will be generated.
 - For PUT requests any `id` value in the body will be ignored, as id values are not mutable.
+- For PATCH requests any `id` value in the body will be ignored, as id values are not mutable.
 
 ## Parameters
 - You can specify an alternative port with the flag `-p` or `--port`. Default value is `3000`.
