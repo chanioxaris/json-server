@@ -38,8 +38,9 @@ func TestReplace(t *testing.T) {
 			key:        randomKey,
 			id:         randomResource["id"].(string),
 			body: storage.Resource{
-				"id":          randomResource["id"].(string),
-				"description": "replaced-description",
+				"id":      randomResource["id"].(string),
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
 			},
 		},
 		{
@@ -48,8 +49,9 @@ func TestReplace(t *testing.T) {
 			key:        randomKey,
 			id:         randomResource["id"].(string),
 			body: storage.Resource{
-				"id":          "2020",
-				"description": "replaced-description",
+				"id":      "2020",
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
 			},
 		},
 		{
@@ -58,7 +60,8 @@ func TestReplace(t *testing.T) {
 			key:        randomKey,
 			id:         randomResource["id"].(string),
 			body: storage.Resource{
-				"description": "replaced-description",
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
 			},
 		},
 		{
@@ -86,7 +89,8 @@ func TestReplace(t *testing.T) {
 			statusCode: http.StatusNotFound,
 			key:        randomKey,
 			body: storage.Resource{
-				"description": "replaced-description",
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
 			},
 			id:      "randomId",
 			wantErr: true,

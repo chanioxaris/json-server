@@ -229,8 +229,9 @@ func TestCreate(t *testing.T) {
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
-				"id":          "2020",
-				"description": "new-description",
+				"id":      "2020",
+				"field_1": "new-field_1",
+				"field_2": "new-field_2",
 			},
 		},
 		{
@@ -241,7 +242,8 @@ func TestCreate(t *testing.T) {
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
-				"description": "new-description",
+				"field_1": "new-field_1",
+				"field_2": "new-field_2",
 			},
 		},
 		{
@@ -252,8 +254,9 @@ func TestCreate(t *testing.T) {
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
-				"id":          randomResource["id"].(string),
-				"description": "new-description",
+				"id":      randomResource["id"].(string),
+				"field_1": "new-field_1",
+				"field_2": "new-field_2",
 			},
 			wantErr: true,
 			err:     storage.ErrResourceAlreadyExists,
@@ -356,7 +359,8 @@ func TestReplace(t *testing.T) {
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
-				"description": "replaced-description",
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
 			},
 			id: randomResource["id"].(string),
 		},
@@ -368,8 +372,9 @@ func TestReplace(t *testing.T) {
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
-				"id":          "2020",
-				"description": "replaced-description",
+				"id":      "2020",
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
 			},
 			id: randomResource["id"].(string),
 		},
@@ -381,7 +386,8 @@ func TestReplace(t *testing.T) {
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
-				"description": "replaced-description",
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
 			},
 			id:      "2020",
 			wantErr: true,
@@ -577,8 +583,9 @@ func testGenerateData() ([]byte, error) {
 		resources := make([]storage.Resource, 0)
 		for idx := 0; idx < rand.Intn(10)+1; idx++ {
 			newResource := storage.Resource{
-				"id":          strconv.Itoa(idx),
-				"description": fmt.Sprintf("description-%s-%d", key, idx),
+				"id":      strconv.Itoa(idx),
+				"field_1": fmt.Sprintf("field_1-%s-%d", key, idx),
+				"field_2": fmt.Sprintf("field_2-%s-%d", key, idx),
 			}
 
 			resources = append(resources, newResource)

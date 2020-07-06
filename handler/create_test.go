@@ -36,8 +36,9 @@ func TestCreate(t *testing.T) {
 			statusCode: http.StatusCreated,
 			key:        randomKey,
 			body: storage.Resource{
-				"id":          "2020",
-				"description": "new-description",
+				"id":      "2020",
+				"field_1": "new-field_1",
+				"field_2": "new-field_2",
 			},
 		},
 		{
@@ -45,7 +46,8 @@ func TestCreate(t *testing.T) {
 			statusCode: http.StatusCreated,
 			key:        randomKey,
 			body: storage.Resource{
-				"description": "new-description",
+				"field_1": "new-field_1",
+				"field_2": "new-field_2",
 			},
 		},
 		{
@@ -71,8 +73,9 @@ func TestCreate(t *testing.T) {
 			statusCode: http.StatusConflict,
 			key:        randomKey,
 			body: storage.Resource{
-				"id":          randomResource["id"],
-				"description": "new-description",
+				"id":      randomResource["id"],
+				"field_1": "new-field_1",
+				"field_2": "new-field_2",
 			},
 			wantErr: true,
 			err:     storage.ErrResourceAlreadyExists,

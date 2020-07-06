@@ -70,8 +70,9 @@ func testGenerateData() ([]byte, error) {
 		resources := make([]storage.Resource, 0)
 		for idx := 0; idx < rand.Intn(10)+1; idx++ {
 			newResource := storage.Resource{
-				"id":          strconv.Itoa(idx),
-				"description": fmt.Sprintf("description-%s-%d", key, idx),
+				"id":      strconv.Itoa(idx),
+				"field_1": fmt.Sprintf("field_1-%s-%d", key, idx),
+				"field_2": fmt.Sprintf("field_2-%s-%d", key, idx),
 			}
 
 			resources = append(resources, newResource)

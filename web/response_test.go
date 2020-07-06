@@ -12,8 +12,8 @@ import (
 
 func TestSuccess(t *testing.T) {
 	type body struct {
-		ID          int    `json:"id"`
-		Description string `json:"description"`
+		ID    int    `json:"id"`
+		Field string `json:"field"`
 	}
 
 	testCases := []struct {
@@ -30,8 +30,8 @@ func TestSuccess(t *testing.T) {
 			name:       "Response success with data",
 			statusCode: http.StatusCreated,
 			data: body{
-				ID:          1,
-				Description: "testing success response",
+				ID:    1,
+				Field: "testing success response",
 			},
 		},
 	}
