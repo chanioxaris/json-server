@@ -114,27 +114,15 @@ func TestCreate(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			url := fmt.Sprintf("%s/%s", mockServer.URL, tt.key)
-
-			req, err := http.NewRequest(http.MethodGet, url, nil)
+			resources, err := testListResourcesByKey(tt.key)
 			if err != nil {
-				t.Fatal(err)
-			}
-
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			var body []storage.Resource
-			if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
 				t.Fatal(err)
 			}
 
 			expectedData := append(testData[randomKey].([]storage.Resource), got)
 
-			if !reflect.DeepEqual(body, expectedData) {
-				t.Fatalf("expected data %v, but got %v", expectedData, body)
+			if !reflect.DeepEqual(resources, expectedData) {
+				t.Fatalf("expected data %v, but got %v", expectedData, resources)
 			}
 		} else {
 			var body bodyError

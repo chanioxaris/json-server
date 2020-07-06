@@ -68,28 +68,16 @@ func TestDelete(t *testing.T) {
 		}
 
 		if !tt.wantErr {
-			url := fmt.Sprintf("%s/%s", mockServer.URL, tt.key)
-
-			req, err := http.NewRequest(http.MethodGet, url, nil)
+			resources, err := testListResourcesByKey(tt.key)
 			if err != nil {
-				t.Fatal(err)
-			}
-
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			var body []storage.Resource
-			if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
 				t.Fatal(err)
 			}
 
 			testKeyData := testData[randomKey].([]storage.Resource)
 			expectedData := append(testKeyData[:randomResourceIndex], testKeyData[randomResourceIndex+1:]...)
 
-			if !reflect.DeepEqual(body, expectedData) {
-				t.Fatalf("expected body %v, but got %v", expectedData, body)
+			if !reflect.DeepEqual(resources, expectedData) {
+				t.Fatalf("expected body %v, but got %v", expectedData, resources)
 			}
 		} else {
 			var body bodyError

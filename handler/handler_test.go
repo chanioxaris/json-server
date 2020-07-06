@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"strconv"
@@ -99,4 +100,25 @@ func testResetData(filename string) error {
 	}
 
 	return nil
+}
+
+func testListResourcesByKey(key string) ([]storage.Resource, error) {
+	url := fmt.Sprintf("%s/%s", mockServer.URL, key)
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var body []storage.Resource
+	if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, err
+	}
+
+	return body, nil
 }
