@@ -90,8 +90,8 @@ func (s *Storage) Create(newResource Resource) (Resource, error) {
 	return newResource, nil
 }
 
-// Update an existing resource for the specific key.
-func (s *Storage) Update(id string, updatedResource Resource) (Resource, error) {
+// Replace an existing resource for the specific key.
+func (s *Storage) Replace(id string, replaced Resource) (Resource, error) {
 	data, err := readFile(s.file)
 	if err != nil {
 		return nil, err
@@ -106,12 +106,12 @@ func (s *Storage) Update(id string, updatedResource Resource) (Resource, error) 
 		return nil, err
 	}
 
-	updatedResource["id"] = id
+	replaced["id"] = id
 
 	newResources := make([]Resource, 0)
 	for _, d := range data[s.key].([]Resource) {
 		if d["id"] == id {
-			newResources = append(newResources, updatedResource)
+			newResources = append(newResources, replaced)
 		} else {
 			newResources = append(newResources, d)
 		}
@@ -123,7 +123,7 @@ func (s *Storage) Update(id string, updatedResource Resource) (Resource, error) 
 		return nil, err
 	}
 
-	return updatedResource, nil
+	return replaced, nil
 }
 
 // Delete an existing resource for the specific key.

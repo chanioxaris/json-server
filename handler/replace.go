@@ -11,8 +11,8 @@ import (
 	"github.com/chanioxaris/json-server/web"
 )
 
-// Update operates as a http handle, to update an existing resource.
-func Update(storageSvc storage.Service) http.HandlerFunc {
+// Replace operates as a http handle, to replace an existing resource.
+func Replace(storageSvc storage.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Read request path parameter id.
 		id := mux.Vars(r)["id"]
@@ -30,8 +30,8 @@ func Update(storageSvc storage.Service) http.HandlerFunc {
 			return
 		}
 
-		// Update the resource.
-		data, err := storageSvc.Update(id, newResource)
+		// Replace the resource.
+		data, err := storageSvc.Replace(id, newResource)
 		if err != nil {
 			// Resource not found.
 			if errors.Is(err, storage.ErrResourceNotFound) {

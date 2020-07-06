@@ -23,6 +23,6 @@ type Service interface {
 	Find() ([]Resource, error)
 	FindById(string) (Resource, error)
 	Create(Resource) (Resource, error)
-	Update(string, Resource) (Resource, error)
+	Replace(string, Resource) (Resource, error)
 	Delete(string) error
 }

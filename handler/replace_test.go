@@ -12,7 +12,7 @@ import (
 	"github.com/chanioxaris/json-server/storage"
 )
 
-func TestUpdate(t *testing.T) {
+func TestReplace(t *testing.T) {
 	randomKeyIndex := rand.Intn(len(pluralKeys))
 	randomKey := pluralKeys[randomKeyIndex]
 
@@ -33,36 +33,36 @@ func TestUpdate(t *testing.T) {
 		err        error
 	}{
 		{
-			name:       "Update resource with id provided in body",
+			name:       "Replace resource with id provided in body",
 			statusCode: http.StatusOK,
 			key:        randomKey,
 			id:         randomResource["id"].(string),
 			body: storage.Resource{
 				"id":          randomResource["id"].(string),
-				"description": "updated-description",
+				"description": "replaced-description",
 			},
 		},
 		{
-			name:       "Update resource with different id provided in body",
+			name:       "Replace resource with different id provided in body",
 			statusCode: http.StatusOK,
 			key:        randomKey,
 			id:         randomResource["id"].(string),
 			body: storage.Resource{
 				"id":          "2020",
-				"description": "updated-description",
+				"description": "replaced-description",
 			},
 		},
 		{
-			name:       "Update resource without id provided in body",
+			name:       "Replace resource without id provided in body",
 			statusCode: http.StatusOK,
 			key:        randomKey,
 			id:         randomResource["id"].(string),
 			body: storage.Resource{
-				"description": "updated-description",
+				"description": "replaced-description",
 			},
 		},
 		{
-			name:       "Update resource with empty body",
+			name:       "Replace resource with empty body",
 			statusCode: http.StatusBadRequest,
 			key:        randomKey,
 			body:       nil,
@@ -71,7 +71,7 @@ func TestUpdate(t *testing.T) {
 			err:        storage.ErrBadRequest,
 		},
 		{
-			name:       "Update resource with body contains only id",
+			name:       "Replace resource with body contains only id",
 			statusCode: http.StatusBadRequest,
 			key:        randomKey,
 			body: storage.Resource{
@@ -82,11 +82,11 @@ func TestUpdate(t *testing.T) {
 			err:     storage.ErrBadRequest,
 		},
 		{
-			name:       "Update resource with not existing id",
+			name:       "Replace resource with not existing id",
 			statusCode: http.StatusNotFound,
 			key:        randomKey,
 			body: storage.Resource{
-				"description": "updated-description",
+				"description": "replaced-description",
 			},
 			id:      "randomId",
 			wantErr: true,

@@ -122,7 +122,7 @@ func SetupRouter(content map[string]interface{}, file string) (http.Handler, err
 			router.HandleFunc(fmt.Sprintf("/%s", key), handler.List(storageSvc)).Methods(http.MethodGet)
 			router.HandleFunc(fmt.Sprintf("/%s/{id}", key), handler.Read(storageSvc)).Methods(http.MethodGet)
 			router.HandleFunc(fmt.Sprintf("/%s", key), handler.Create(storageSvc)).Methods(http.MethodPost)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", key), handler.Update(storageSvc)).Methods(http.MethodPut)
+			router.HandleFunc(fmt.Sprintf("/%s/{id}", key), handler.Replace(storageSvc)).Methods(http.MethodPut)
 			router.HandleFunc(fmt.Sprintf("/%s/{id}", key), handler.Delete(storageSvc)).Methods(http.MethodDelete)
 		// Otherwise register only a read endpoint handler.
 		default:

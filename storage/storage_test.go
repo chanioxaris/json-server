@@ -322,7 +322,7 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func TestUpdate(t *testing.T) {
+func TestReplace(t *testing.T) {
 	f, err := testGenerateStorageFile()
 	if err != nil {
 		t.Fatal(err)
@@ -349,19 +349,19 @@ func TestUpdate(t *testing.T) {
 		err      error
 	}{
 		{
-			name: "Update resource without id provided",
+			name: "Replace resource without id provided",
 			args: args{
 				key:      randomKey,
 				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
-				"description": "updated-description",
+				"description": "replaced-description",
 			},
 			id: randomResource["id"].(string),
 		},
 		{
-			name: "Update resource with id provided",
+			name: "Replace resource with id provided",
 			args: args{
 				key:      randomKey,
 				singular: false,
@@ -369,26 +369,26 @@ func TestUpdate(t *testing.T) {
 			},
 			resource: storage.Resource{
 				"id":          "2020",
-				"description": "updated-description",
+				"description": "replaced-description",
 			},
 			id: randomResource["id"].(string),
 		},
 		{
-			name: "Update invalid resource with non existing id",
+			name: "Replace invalid resource with non existing id",
 			args: args{
 				key:      randomKey,
 				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
-				"description": "updated-description",
+				"description": "replaced-description",
 			},
 			id:      "2020",
 			wantErr: true,
 			err:     storage.ErrResourceNotFound,
 		},
 		{
-			name: "Update resource of invalid resource key",
+			name: "Replace resource of invalid resource key",
 			args: args{
 				key:      "randomKey",
 				singular: false,
@@ -398,7 +398,7 @@ func TestUpdate(t *testing.T) {
 			err:     storage.ErrResourceNotFound,
 		},
 		{
-			name: "Update resource of invalid file name",
+			name: "Replace resource of invalid file name",
 			args: args{
 				key:      randomKey,
 				singular: false,
@@ -419,14 +419,14 @@ func TestUpdate(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got, err := storageSvc.Update(tt.id, tt.resource)
+		got, err := storageSvc.Replace(tt.id, tt.resource)
 		if err != nil && !tt.wantErr {
 			t.Fatal(err)
 		}
 
 		if !tt.wantErr {
 			if !reflect.DeepEqual(got, tt.resource) {
-				t.Fatalf("expected updated %v, but got %v", tt.resource, got)
+				t.Fatalf("expected replaced %v, but got %v", tt.resource, got)
 			}
 
 			currData, err := storageSvc.Find()
