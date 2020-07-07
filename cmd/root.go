@@ -123,6 +123,7 @@ func run(cmd *cobra.Command, _ []string) error {
 
 func SetupRouter(content map[string]interface{}, file string) (http.Handler, error) {
 	router := mux.NewRouter().StrictSlash(true)
+	router.Use(middleware.Recovery)
 	router.Use(middleware.Logger)
 
 	// For each resource create the appropriate endpoint handlers.
