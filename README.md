@@ -80,6 +80,9 @@ When doing requests, it's good to know that:
 
 `go run main.go -f example.json`
 
+- You can toggle http request logs with the flag `-l` or `--logs`. Default value is `false`.
+
+`go run main.go -l`
 
 ## License
 

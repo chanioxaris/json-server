@@ -32,9 +32,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/chanioxaris/json-server/handler"
+	"github.com/chanioxaris/json-server/logger"
+	"github.com/chanioxaris/json-server/middleware"
 	"github.com/chanioxaris/json-server/storage"
 )
 
@@ -54,6 +57,8 @@ func init() {
 	rootCmd.Flags().StringP("port", "p", "3000", "Port the server will listen to")
 	// Optional flag to set the watch file.
 	rootCmd.Flags().StringP("file", "f", "db.json", "File to watch")
+	// Optional flag to enable logs.
+	rootCmd.Flags().BoolP("logs", "l", false, "Enable logs")
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -66,6 +71,8 @@ func Execute() {
 }
 
 func run(cmd *cobra.Command, _ []string) error {
+	rand.Seed(time.Now().UnixNano())
+
 	// Parse command's flags.
 	port, err := cmd.Flags().GetString("port")
 	if err != nil {
@@ -77,7 +84,12 @@ func run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	rand.Seed(time.Now().UnixNano())
+	logs, err := cmd.Flags().GetBool("logs")
+	if err != nil {
+		return err
+	}
+
+	setupLogger(logs)
 
 	// Read file contents used as 'database'.
 	contentBytes, err := ioutil.ReadFile(file)
@@ -102,6 +114,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	for key := range content {
 		fmt.Printf("\033[32m/%s \033[0m\n", key)
 	}
+	fmt.Println()
 
 	fmt.Println(http.ListenAndServe(":"+port, router))
 
@@ -110,6 +123,7 @@ func run(cmd *cobra.Command, _ []string) error {
 
 func SetupRouter(content map[string]interface{}, file string) (http.Handler, error) {
 	router := mux.NewRouter().StrictSlash(true)
+	router.Use(middleware.Logger)
 
 	// For each resource create the appropriate endpoint handlers.
 	for key, val := range content {
@@ -141,4 +155,12 @@ func SetupRouter(content map[string]interface{}, file string) (http.Handler, err
 	}
 
 	return router, nil
+}
+
+func setupLogger(show bool) {
+	logrus.SetFormatter(&logger.CustomFormatter{})
+
+	if !show {
+		logrus.SetOutput(ioutil.Discard)
+	}
 }
