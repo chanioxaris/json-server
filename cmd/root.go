@@ -89,30 +89,26 @@ func run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
+	// Setup logger.
 	setupLogger(logs)
 
-	// Read file contents used as 'database'.
-	contentBytes, err := ioutil.ReadFile(file)
+	// Get storage resources.
+	storageResources, err := getStorageResources(file)
 	if err != nil {
 		return err
 	}
 
-	content := map[string]interface{}{}
-	if err = json.Unmarshal(contentBytes, &content); err != nil {
-		return err
-	}
-
 	// Setup router.
-	router, err := SetupRouter(content, file)
+	router, err := SetupRouter(storageResources, file)
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Server listening on http://localhost:%s\n\n", port)
 
-	fmt.Println("Available endpoints:")
-	for key := range content {
-		fmt.Printf("\033[32m/%s \033[0m\n", key)
+	fmt.Println("Resources:")
+	for resource := range storageResources {
+		fmt.Printf("/%s\n", resource)
 	}
 	fmt.Println()
 
@@ -121,37 +117,32 @@ func run(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-func SetupRouter(content map[string]interface{}, file string) (http.Handler, error) {
+// SetupRouter based on provided resources.
+func SetupRouter(storageResources map[string]bool, file string) (http.Handler, error) {
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(middleware.Recovery)
 	router.Use(middleware.Logger)
 
 	// For each resource create the appropriate endpoint handlers.
-	for key, val := range content {
-		switch reflect.TypeOf(val).Kind() {
-		// If there is an array, register all default endpoint handlers.
-		case reflect.Slice:
-			// Create storage service to access the 'database' for specific resource.
-			storageSvc, err := storage.NewStorage(file, key, false)
-			if err != nil {
-				return nil, err
-			}
+	for resource, singular := range storageResources {
+		// Create storage service to access the 'database' for specific resource.
+		storageSvc, err := storage.NewStorage(file, resource, singular)
+		if err != nil {
+			return nil, err
+		}
 
-			router.HandleFunc(fmt.Sprintf("/%s", key), handler.List(storageSvc)).Methods(http.MethodGet)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", key), handler.Read(storageSvc)).Methods(http.MethodGet)
-			router.HandleFunc(fmt.Sprintf("/%s", key), handler.Create(storageSvc)).Methods(http.MethodPost)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", key), handler.Replace(storageSvc)).Methods(http.MethodPut)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", key), handler.Update(storageSvc)).Methods(http.MethodPatch)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", key), handler.Delete(storageSvc)).Methods(http.MethodDelete)
-		// Otherwise register only a read endpoint handler.
+		switch singular {
+		// Register all default endpoint handlers for plural resource.
+		case false:
+			router.HandleFunc(fmt.Sprintf("/%s", resource), handler.List(storageSvc)).Methods(http.MethodGet)
+			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), handler.Read(storageSvc)).Methods(http.MethodGet)
+			router.HandleFunc(fmt.Sprintf("/%s", resource), handler.Create(storageSvc)).Methods(http.MethodPost)
+			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), handler.Replace(storageSvc)).Methods(http.MethodPut)
+			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), handler.Update(storageSvc)).Methods(http.MethodPatch)
+			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), handler.Delete(storageSvc)).Methods(http.MethodDelete)
+			// Register default endpoint handler for singular resource.
 		default:
-			// Create storage service to access the 'database' for specific resource.
-			storageSvc, err := storage.NewStorage(file, key, true)
-			if err != nil {
-				return nil, err
-			}
-
-			router.HandleFunc(fmt.Sprintf("/%s", key), handler.Read(storageSvc)).Methods(http.MethodGet)
+			router.HandleFunc(fmt.Sprintf("/%s", resource), handler.Read(storageSvc)).Methods(http.MethodGet)
 		}
 	}
 
@@ -164,4 +155,31 @@ func setupLogger(show bool) {
 	if !show {
 		logrus.SetOutput(ioutil.Discard)
 	}
+}
+
+func getStorageResources(filename string) (map[string]bool, error) {
+	// Read file contents used as storage.
+	contentBytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	content := map[string]interface{}{}
+	if err = json.Unmarshal(contentBytes, &content); err != nil {
+		return nil, err
+	}
+
+	storageKeys := make(map[string]bool)
+
+	// Range on content to retrieve resource keys and type (plural, singular).
+	for resource, data := range content {
+		switch reflect.TypeOf(data).Kind() {
+		case reflect.Slice:
+			storageKeys[resource] = false
+		default:
+			storageKeys[resource] = false
+		}
+	}
+
+	return storageKeys, nil
 }

@@ -30,14 +30,13 @@ var (
 func TestMain(m *testing.M) {
 	rand.Seed(time.Now().UnixNano())
 
-	var err error
-	fileName, err = testGenerateJSONFile()
+	storageResources, err := testGenerateJSONFile()
 	if err != nil {
 		panic(err)
 	}
 	defer os.Remove(fileName)
 
-	router, err := cmd.SetupRouter(testData, fileName)
+	router, err := cmd.SetupRouter(storageResources, fileName)
 	if err != nil {
 		panic(err)
 	}
@@ -48,25 +47,29 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func testGenerateJSONFile() (string, error) {
+func testGenerateJSONFile() (map[string]bool, error) {
 	f, err := ioutil.TempFile(".", "")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	contentBytes, err := testGenerateData()
+	fileName = f.Name()
+
+	contentBytes, storageResources, err := testGenerateData()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if err = ioutil.WriteFile(f.Name(), contentBytes, 0644); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return f.Name(), nil
+	return storageResources, nil
 }
 
-func testGenerateData() ([]byte, error) {
+func testGenerateData() ([]byte, map[string]bool, error) {
+	storageResources := make(map[string]bool, 0)
+
 	for _, key := range pluralKeys {
 		resources := make([]storage.Resource, 0)
 		for idx := 0; idx < rand.Intn(10)+1; idx++ {
@@ -80,13 +83,20 @@ func testGenerateData() ([]byte, error) {
 		}
 
 		testData[key] = resources
+		storageResources[key] = false
 	}
 
 	for _, key := range singularKeys {
 		testData[key] = rand.Intn(1000)
+		storageResources[key] = true
 	}
 
-	return json.MarshalIndent(testData, "", "  ")
+	contentBytes, err := json.MarshalIndent(testData, "", "  ")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return contentBytes, storageResources, nil
 }
 
 func testResetData(filename string) error {
