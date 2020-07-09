@@ -22,12 +22,18 @@ var (
 	pluralKeys   = []string{"plural_key_1", "plural_key_2"}
 	singularKeys = []string{"singular_key"}
 
-	testData = make(map[string]interface{}, 0)
+	testData = make(map[string]interface{})
 
 	fileName string
 )
 
 func TestMain(m *testing.M) {
+	// testMain wrapper is needed to support defers and panics.
+	// os.Exit will ignore those and exit silently.
+	os.Exit(testMain(m))
+}
+
+func testMain(m *testing.M) int {
 	rand.Seed(time.Now().UnixNano())
 
 	storageResources, err := testGenerateJSONFile()
@@ -44,7 +50,7 @@ func TestMain(m *testing.M) {
 	mockServer = httptest.NewServer(router)
 	defer mockServer.Close()
 
-	m.Run()
+	return m.Run()
 }
 
 func testGenerateJSONFile() (map[string]bool, error) {
@@ -68,7 +74,7 @@ func testGenerateJSONFile() (map[string]bool, error) {
 }
 
 func testGenerateData() ([]byte, map[string]bool, error) {
-	storageResources := make(map[string]bool, 0)
+	storageResources := make(map[string]bool)
 
 	for _, key := range pluralKeys {
 		resources := make([]storage.Resource, 0)

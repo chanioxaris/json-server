@@ -210,7 +210,7 @@ func readFile(file string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	contentResource := make(map[string]interface{}, 0)
+	contentResource := make(map[string]interface{})
 	for key, val := range content {
 		data := make([]Resource, 0)
 
@@ -255,7 +255,7 @@ func updateFile(file string, content map[string]interface{}) error {
 
 // generateNewId and validate that is unique across provided data.
 func generateNewId(data []Resource) string {
-	existingIds := make(map[string]bool, 0)
+	existingIds := make(map[string]bool)
 	for _, d := range data {
 		existingIds[d["id"].(string)] = true
 	}

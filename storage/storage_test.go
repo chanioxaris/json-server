@@ -17,7 +17,7 @@ import (
 
 var (
 	keys     = []string{"key1", "key2"}
-	testData = make(map[string][]storage.Resource, 0)
+	testData = make(map[string][]storage.Resource)
 )
 
 func TestMain(m *testing.M) {
