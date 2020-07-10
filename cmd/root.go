@@ -177,7 +177,7 @@ func getStorageResources(filename string) (map[string]bool, error) {
 		case reflect.Slice:
 			storageKeys[resource] = false
 		default:
-			storageKeys[resource] = false
+			storageKeys[resource] = true
 		}
 	}
 
