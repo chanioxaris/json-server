@@ -26,6 +26,11 @@ jobs:
         with:
           go-version: 1.14
       - name: Test
-        run: go test ./...
+        run: go test ./... -coverprofile "coverage.out"
         env:
           CGO_ENABLED: 0
+      - name: Upload coverage report to CodeCov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: ./coverage.out
