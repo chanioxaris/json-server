@@ -7,9 +7,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// CustomFormatter for logrus logger.
 type CustomFormatter struct {
 }
 
+// Format renders a single custom log entry.
 func (f *CustomFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// Output buffer.
 	b := &bytes.Buffer{}
