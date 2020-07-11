@@ -131,7 +131,8 @@ func TestUpdate(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			expectedData := testData[randomKey].([]storage.Resource)
+			expectedData := make([]storage.Resource, len(testData[randomKey].([]storage.Resource)))
+			copy(expectedData, testData[randomKey].([]storage.Resource))
 			expectedData[randomResourceIndex] = got
 
 			if !reflect.DeepEqual(resources, expectedData) {

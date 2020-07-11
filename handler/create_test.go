@@ -119,7 +119,9 @@ func TestCreate(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			expectedData := append(testData[randomKey].([]storage.Resource), got)
+			expectedData := make([]storage.Resource, len(testData[randomKey].([]storage.Resource)))
+			copy(expectedData, testData[randomKey].([]storage.Resource))
+			expectedData = append(expectedData, got)
 
 			if !reflect.DeepEqual(resources, expectedData) {
 				t.Fatalf("expected data %v, but got %v", expectedData, resources)

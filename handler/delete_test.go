@@ -73,8 +73,9 @@ func TestDelete(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			testKeyData := testData[randomKey].([]storage.Resource)
-			expectedData := append(testKeyData[:randomResourceIndex], testKeyData[randomResourceIndex+1:]...)
+			expectedData := make([]storage.Resource, len(testData[randomKey].([]storage.Resource)))
+			copy(expectedData, testData[randomKey].([]storage.Resource))
+			expectedData = append(expectedData[:randomResourceIndex], expectedData[randomResourceIndex+1:]...)
 
 			if !reflect.DeepEqual(resources, expectedData) {
 				t.Fatalf("expected body %v, but got %v", expectedData, resources)
