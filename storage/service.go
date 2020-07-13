@@ -18,6 +18,9 @@ var (
 // Resource represents the structure of a singe resource in storage.
 type Resource map[string]interface{}
 
+// Database represents the contents of the storage.
+type Database map[string]interface{}
+
 // Service interface to handle storage operations.
 type Service interface {
 	Find() ([]Resource, error)
@@ -26,4 +29,5 @@ type Service interface {
 	Replace(string, Resource) (Resource, error)
 	Update(string, Resource) (Resource, error)
 	Delete(string) error
+	DB() (Database, error)
 }

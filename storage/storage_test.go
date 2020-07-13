@@ -692,6 +692,60 @@ func TestDelete(t *testing.T) {
 	}
 }
 
+func TestDB(t *testing.T) {
+	f, err := testGenerateStorageFile()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(f.Name())
+
+	type args struct {
+		key      string
+		singular bool
+		filename string
+	}
+	testCases := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "Get database",
+			args: args{
+				key:      "",
+				singular: false,
+				filename: f.Name(),
+			},
+		},
+	}
+
+	for _, tt := range testCases {
+		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key, tt.args.singular)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got, err := storageSvc.DB()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		testDataBytes, err := json.Marshal(testData)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		gotBytes, err := json.Marshal(got)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if !reflect.DeepEqual(gotBytes, testDataBytes) {
+			t.Fatalf("expected data %v, but got %v", testData, got)
+		}
+	}
+}
+
 func testGenerateStorageFile() (*os.File, error) {
 	f, err := ioutil.TempFile(".", "")
 	if err != nil {

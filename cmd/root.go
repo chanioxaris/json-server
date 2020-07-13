@@ -142,6 +142,15 @@ func SetupRouter(storageResources map[string]bool, file string) (http.Handler, e
 		}
 	}
 
+	// Default endpoint to list all resources.
+	storageSvc, err := storage.NewStorage(file, "", false)
+	if err != nil {
+		return nil, err
+	}
+
+	router.HandleFunc("/db", common.DB(storageSvc)).Methods(http.MethodGet)
+
+	// Render a home page with useful info.
 	router.HandleFunc("/", common.HomePage(storageResources)).Methods(http.MethodGet)
 
 	return router, nil
@@ -190,6 +199,8 @@ func displayInfo(storageResources map[string]bool, port string) {
 	for resource := range storageResources {
 		fmt.Printf("http://localhost:%s/%s\n", port, resource)
 	}
+
+	fmt.Printf("http://localhost:%s/db\n", port)
 	fmt.Println()
 
 	fmt.Println("Home")

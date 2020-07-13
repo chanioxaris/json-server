@@ -62,6 +62,17 @@ const homePageTemplate = `
 				{{ end }}
 				</br>
 			{{ end }}
+
+			/db
+				<span 
+					class="badge badge-secondary"
+					data-toggle="tooltip" 
+					data-html="true"
+					data-placement="right" 
+					title="<ul><li>GET /db</li></ul>"
+				>
+					1
+				</span>
 		</div>
 
 		<footer class="fixed-bottom text-center mb-3">

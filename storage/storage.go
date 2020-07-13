@@ -198,8 +198,13 @@ func (s *Storage) Delete(id string) error {
 	return updateFile(s.file, data)
 }
 
+// DB returns all the contents of the storage.
+func (s *Storage) DB() (Database, error) {
+	return readFile(s.file)
+}
+
 // readFile returns all the data from the watch file.
-func readFile(file string) (map[string]interface{}, error) {
+func readFile(file string) (Database, error) {
 	contentBytes, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, err
@@ -210,7 +215,7 @@ func readFile(file string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	contentResource := make(map[string]interface{})
+	contentResource := make(Database)
 	for key, val := range content {
 		data := make([]Resource, 0)
 
