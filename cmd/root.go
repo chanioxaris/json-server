@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -53,6 +54,13 @@ var rootCmd = &cobra.Command{
 	RunE: run,
 }
 
+var (
+	errFailedParseFlag     = errors.New("failed to parse flag")
+	errFailedParseFile     = errors.New("failed to parse file")
+	errFailedInitResources = errors.New("failed to initialize resources")
+	errFileNotFound        = errors.New("unable to find requested file")
+)
+
 func init() {
 	// Optional flag to set the server port.
 	rootCmd.Flags().StringP("port", "p", "3000", "Port the server will listen to")
@@ -66,7 +74,6 @@ func init() {
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }
@@ -77,17 +84,17 @@ func run(cmd *cobra.Command, _ []string) error {
 	// Parse command's flags.
 	port, err := cmd.Flags().GetString("port")
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: port", errFailedParseFlag)
 	}
 
 	file, err := cmd.Flags().GetString("file")
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: file", errFailedParseFlag)
 	}
 
 	logs, err := cmd.Flags().GetBool("logs")
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: logs", errFailedParseFlag)
 	}
 
 	// Setup logger.
@@ -124,7 +131,7 @@ func SetupRouter(storageResources map[string]bool, file string) (http.Handler, e
 		// Create storage service to access the 'database' for specific resource.
 		storageSvc, err := storage.NewStorage(file, resource, singular)
 		if err != nil {
-			return nil, err
+			return nil, errFailedInitResources
 		}
 
 		switch singular {
@@ -145,7 +152,7 @@ func SetupRouter(storageResources map[string]bool, file string) (http.Handler, e
 	// Default endpoint to list all resources.
 	storageSvc, err := storage.NewStorage(file, "", false)
 	if err != nil {
-		return nil, err
+		return nil, errFailedInitResources
 	}
 
 	router.HandleFunc("/db", common.DB(storageSvc)).Methods(http.MethodGet)
@@ -168,12 +175,12 @@ func getStorageResources(filename string) (map[string]bool, error) {
 	// Read file contents used as storage.
 	contentBytes, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %s", errFileNotFound, filename)
 	}
 
 	content := map[string]interface{}{}
 	if err = json.Unmarshal(contentBytes, &content); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %s", errFailedParseFile, filename)
 	}
 
 	storageKeys := make(map[string]bool)
