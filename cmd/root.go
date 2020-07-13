@@ -36,6 +36,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/chanioxaris/json-server/handler"
+	"github.com/chanioxaris/json-server/handler/common"
 	"github.com/chanioxaris/json-server/logger"
 	"github.com/chanioxaris/json-server/middleware"
 	"github.com/chanioxaris/json-server/storage"
@@ -104,13 +105,8 @@ func run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	fmt.Printf("Server listening on http://localhost:%s\n\n", port)
-
-	fmt.Println("Resources:")
-	for resource := range storageResources {
-		fmt.Printf("/%s\n", resource)
-	}
-	fmt.Println()
+	// Preview info about available resources and home page.
+	displayInfo(storageResources, port)
 
 	fmt.Println(http.ListenAndServe(":"+port, router))
 
@@ -145,6 +141,8 @@ func SetupRouter(storageResources map[string]bool, file string) (http.Handler, e
 			router.HandleFunc(fmt.Sprintf("/%s", resource), handler.Read(storageSvc)).Methods(http.MethodGet)
 		}
 	}
+
+	router.HandleFunc("/", common.HomePage(storageResources)).Methods(http.MethodGet)
 
 	return router, nil
 }
@@ -182,4 +180,19 @@ func getStorageResources(filename string) (map[string]bool, error) {
 	}
 
 	return storageKeys, nil
+}
+
+func displayInfo(storageResources map[string]bool, port string) {
+	fmt.Println("JSON Server successfully running")
+	fmt.Println()
+
+	fmt.Println("Resources")
+	for resource := range storageResources {
+		fmt.Printf("http://localhost:%s/%s\n", port, resource)
+	}
+	fmt.Println()
+
+	fmt.Println("Home")
+	fmt.Printf("http://localhost:%s\n", port)
+	fmt.Println()
 }
