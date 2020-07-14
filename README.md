@@ -1,5 +1,6 @@
 # JSON Server
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/chanioxaris/json-server/master/LICENSE)
+[![GoDoc](https://godoc.org/github.com/chanioxaris/json-server?status.svg)](https://godoc.org/github.com/chanioxaris/json-server)
 [![codecov](https://codecov.io/gh/chanioxaris/json-server/branch/master/graph/badge.svg)](https://codecov.io/gh/chanioxaris/json-server)
 [![goreportcard](https://goreportcard.com/badge/github.com/chanioxaris/json-server)](https://goreportcard.com/report/github.com/chanioxaris/json-server)
 

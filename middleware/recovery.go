@@ -1,3 +1,4 @@
+// Package middleware provides middleware support for REST API server.
 package middleware
 
 import (

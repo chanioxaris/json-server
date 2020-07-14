@@ -9,7 +9,7 @@ import (
 	"github.com/chanioxaris/json-server/web"
 )
 
-// Create operates as a http handle, to add a new resource.
+// Create operates as a http handler, to add a new resource.
 func Create(storageSvc storage.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Read and decode request body.

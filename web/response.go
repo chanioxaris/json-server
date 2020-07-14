@@ -1,3 +1,4 @@
+// Package web provides http support functionality.
 package web
 
 import (

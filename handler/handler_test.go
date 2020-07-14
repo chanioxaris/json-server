@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chanioxaris/json-server/cmd"
+	"github.com/chanioxaris/json-server/handler"
 	"github.com/chanioxaris/json-server/storage"
 )
 
@@ -42,7 +42,7 @@ func testMain(m *testing.M) int {
 	}
 	defer os.Remove(fileName)
 
-	router, err := cmd.SetupRouter(storageResources, fileName)
+	router, err := handler.Setup(storageResources, fileName)
 	if err != nil {
 		panic(err)
 	}

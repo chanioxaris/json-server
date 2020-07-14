@@ -1,3 +1,4 @@
+// Package storage defines an interface which describes storage CRUD functionality.
 package storage
 
 import (
@@ -18,7 +19,7 @@ var (
 // Resource represents the structure of a singe resource in storage.
 type Resource map[string]interface{}
 
-// Database represents the contents of the storage.
+// Database represents the structure of the storage contents.
 type Database map[string]interface{}
 
 // Service interface to handle storage operations.

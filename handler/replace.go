@@ -11,7 +11,7 @@ import (
 	"github.com/chanioxaris/json-server/web"
 )
 
-// Replace operates as a http handle, to replace an existing resource.
+// Replace operates as a http handler, to replace an existing resource.
 func Replace(storageSvc storage.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Read request path parameter id.

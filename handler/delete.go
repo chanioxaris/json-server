@@ -10,7 +10,7 @@ import (
 	"github.com/chanioxaris/json-server/web"
 )
 
-// Delete operates as a http handle, to delete an existing resource.
+// Delete operates as a http handler, to delete an existing resource.
 func Delete(storageSvc storage.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Read request path parameter id.

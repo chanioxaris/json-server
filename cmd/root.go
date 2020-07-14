@@ -1,24 +1,5 @@
-/*
-Copyright © 2020 Haris Chaniotakis
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
+// Package commands contains the functionality for the set of commands
+// currently supported by the CLI.
 package cmd
 
 import (
@@ -32,15 +13,10 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/chanioxaris/json-server/handler"
-	"github.com/chanioxaris/json-server/handler/common"
 	"github.com/chanioxaris/json-server/logger"
-	"github.com/chanioxaris/json-server/middleware"
-	"github.com/chanioxaris/json-server/storage"
 )
 
 // rootCmd represents the base command when called without any sub commands.
@@ -55,10 +31,9 @@ var rootCmd = &cobra.Command{
 }
 
 var (
-	errFailedParseFlag     = errors.New("failed to parse flag")
-	errFailedParseFile     = errors.New("failed to parse file")
-	errFailedInitResources = errors.New("failed to initialize resources")
-	errFileNotFound        = errors.New("unable to find requested file")
+	errFailedParseFlag = errors.New("failed to parse flag")
+	errFailedParseFile = errors.New("failed to parse file")
+	errFileNotFound    = errors.New("unable to find requested file")
 )
 
 func init() {
@@ -98,7 +73,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Setup logger.
-	setupLogger(logs)
+	logger.Setup(logs)
 
 	// Get storage resources.
 	storageResources, err := getStorageResources(file)
@@ -106,69 +81,27 @@ func run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	// Setup router.
-	router, err := SetupRouter(storageResources, file)
+	// Setup API handler.
+	apiHandler, err := handler.Setup(storageResources, file)
 	if err != nil {
 		return err
 	}
 
-	// Preview info about available resources and home page.
+	api := &http.Server{
+		Addr:    ":" + port,
+		Handler: apiHandler,
+		// Good practice to set timeouts to avoid Slowloris attacks.
+		WriteTimeout: time.Second * 15,
+		ReadTimeout:  time.Second * 15,
+		IdleTimeout:  time.Second * 60,
+	}
+
+	// Display info about available resources and home page.
 	displayInfo(storageResources, port)
 
-	fmt.Println(http.ListenAndServe(":"+port, router))
+	fmt.Println(api.ListenAndServe())
 
 	return nil
-}
-
-// SetupRouter based on provided resources.
-func SetupRouter(storageResources map[string]bool, file string) (http.Handler, error) {
-	router := mux.NewRouter().StrictSlash(true)
-	router.Use(middleware.Recovery)
-	router.Use(middleware.Logger)
-
-	// For each resource create the appropriate endpoint handlers.
-	for resource, singular := range storageResources {
-		// Create storage service to access the 'database' for specific resource.
-		storageSvc, err := storage.NewStorage(file, resource, singular)
-		if err != nil {
-			return nil, errFailedInitResources
-		}
-
-		switch singular {
-		// Register all default endpoint handlers for plural resource.
-		case false:
-			router.HandleFunc(fmt.Sprintf("/%s", resource), handler.List(storageSvc)).Methods(http.MethodGet)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), handler.Read(storageSvc)).Methods(http.MethodGet)
-			router.HandleFunc(fmt.Sprintf("/%s", resource), handler.Create(storageSvc)).Methods(http.MethodPost)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), handler.Replace(storageSvc)).Methods(http.MethodPut)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), handler.Update(storageSvc)).Methods(http.MethodPatch)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), handler.Delete(storageSvc)).Methods(http.MethodDelete)
-			// Register default endpoint handler for singular resource.
-		default:
-			router.HandleFunc(fmt.Sprintf("/%s", resource), handler.Read(storageSvc)).Methods(http.MethodGet)
-		}
-	}
-
-	// Default endpoint to list all resources.
-	storageSvc, err := storage.NewStorage(file, "", false)
-	if err != nil {
-		return nil, errFailedInitResources
-	}
-
-	router.HandleFunc("/db", common.DB(storageSvc)).Methods(http.MethodGet)
-
-	// Render a home page with useful info.
-	router.HandleFunc("/", common.HomePage(storageResources)).Methods(http.MethodGet)
-
-	return router, nil
-}
-
-func setupLogger(show bool) {
-	logrus.SetFormatter(&logger.CustomFormatter{})
-
-	if !show {
-		logrus.SetOutput(ioutil.Discard)
-	}
 }
 
 func getStorageResources(filename string) (map[string]bool, error) {

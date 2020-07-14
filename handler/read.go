@@ -10,7 +10,7 @@ import (
 	"github.com/chanioxaris/json-server/web"
 )
 
-// Read operates as a http handle, to return the requested resource by id.
+// Read operates as a http handler, to return the requested resource by id.
 func Read(storageSvc storage.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Read request path parameter id.

@@ -1,3 +1,5 @@
+// Package common contains the set of handler functions and routes which by
+// default supported from the web api.
 package common
 
 import (

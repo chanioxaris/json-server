@@ -11,7 +11,7 @@ import (
 	"github.com/chanioxaris/json-server/web"
 )
 
-// Update operates as a http handle, to update an existing resource.
+// Update operates as a http handler, to update an existing resource.
 func Update(storageSvc storage.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Read request path parameter id.
