@@ -3,13 +3,16 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"reflect"
 	"time"
 
@@ -31,9 +34,10 @@ var rootCmd = &cobra.Command{
 }
 
 var (
-	errFailedParseFlag = errors.New("failed to parse flag")
-	errFailedParseFile = errors.New("failed to parse file")
-	errFileNotFound    = errors.New("unable to find requested file")
+	errFailedParseFlag   = errors.New("failed to parse flag")
+	errFailedParseFile   = errors.New("failed to parse file")
+	errFileNotFound      = errors.New("unable to find requested file")
+	errFailedStartServer = errors.New("failed to start JSON server. Maybe port already in use")
 )
 
 func init() {
@@ -96,12 +100,43 @@ func run(cmd *cobra.Command, _ []string) error {
 		IdleTimeout:  time.Second * 60,
 	}
 
+	// Start REST API server.
+	listener, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		return errFailedStartServer
+	}
+
+	go api.Serve(listener)
+
 	// Display info about available resources and home page.
 	displayInfo(storageResources, port)
 
-	fmt.Println(api.ListenAndServe())
+	gracefulShutdown(api)
 
 	return nil
+}
+
+// gracefulShutdown handles any signal that interrupts the running server
+func gracefulShutdown(server *http.Server) {
+	c := make(chan os.Signal, 1)
+	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
+	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
+	signal.Notify(c, os.Interrupt)
+
+	// Block until we receive our signal.
+	<-c
+
+	// Create a deadline to wait for.
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
+	// Doesn't block if no connections, but will otherwise wait
+	// until the timeout deadline.
+	if err := server.Shutdown(ctx); err != nil {
+		fmt.Println("failed to gracefully shutdown server")
+		return
+	}
+
+	fmt.Println("gracefully shutting down server")
 }
 
 func getStorageResources(filename string) (map[string]bool, error) {
