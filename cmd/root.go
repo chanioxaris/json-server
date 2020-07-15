@@ -106,6 +106,7 @@ func run(cmd *cobra.Command, _ []string) error {
 		return errFailedStartServer
 	}
 
+	// nolint
 	go api.Serve(listener)
 
 	// Display info about available resources and home page.
