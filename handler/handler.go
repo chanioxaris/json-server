@@ -19,36 +19,30 @@ var (
 )
 
 // Setup API handler based on provided resources.
-func Setup(storageResources map[string]bool, file string) (http.Handler, error) {
+func Setup(resourceKeys []string, file string) (http.Handler, error) {
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(middleware.Recovery)
 	router.Use(middleware.Logger)
 
 	// For each resource create the appropriate endpoint handlers.
-	for resource, singular := range storageResources {
+	for _, resourceKey := range resourceKeys {
 		// Create storage service to access the 'database' for specific resource.
-		storageSvc, err := storage.NewStorage(file, resource, singular)
+		storageSvc, err := storage.NewStorage(file, resourceKey)
 		if err != nil {
 			return nil, errFailedInitResources
 		}
 
-		switch singular {
-		// Register all default endpoint handlers for plural resource.
-		case false:
-			router.HandleFunc(fmt.Sprintf("/%s", resource), List(storageSvc)).Methods(http.MethodGet)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), Read(storageSvc)).Methods(http.MethodGet)
-			router.HandleFunc(fmt.Sprintf("/%s", resource), Create(storageSvc)).Methods(http.MethodPost)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), Replace(storageSvc)).Methods(http.MethodPut)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), Update(storageSvc)).Methods(http.MethodPatch)
-			router.HandleFunc(fmt.Sprintf("/%s/{id}", resource), Delete(storageSvc)).Methods(http.MethodDelete)
-			// Register default endpoint handler for singular resource.
-		default:
-			router.HandleFunc(fmt.Sprintf("/%s", resource), Read(storageSvc)).Methods(http.MethodGet)
-		}
+		// Register all default endpoint handlers for resource.
+		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), List(storageSvc)).Methods(http.MethodGet)
+		router.HandleFunc(fmt.Sprintf("/%s/{id}", resourceKey), Read(storageSvc)).Methods(http.MethodGet)
+		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), Create(storageSvc)).Methods(http.MethodPost)
+		router.HandleFunc(fmt.Sprintf("/%s/{id}", resourceKey), Replace(storageSvc)).Methods(http.MethodPut)
+		router.HandleFunc(fmt.Sprintf("/%s/{id}", resourceKey), Update(storageSvc)).Methods(http.MethodPatch)
+		router.HandleFunc(fmt.Sprintf("/%s/{id}", resourceKey), Delete(storageSvc)).Methods(http.MethodDelete)
 	}
 
 	// Default endpoint to retrieve db contents.
-	storageSvc, err := storage.NewStorage(file, "", false)
+	storageSvc, err := storage.NewStorage(file, "")
 	if err != nil {
 		return nil, errFailedInitResources
 	}
@@ -56,7 +50,7 @@ func Setup(storageResources map[string]bool, file string) (http.Handler, error) 
 	router.HandleFunc("/db", common.DB(storageSvc)).Methods(http.MethodGet)
 
 	// Render a home page with useful info.
-	router.HandleFunc("/", common.HomePage(storageResources)).Methods(http.MethodGet)
+	router.HandleFunc("/", common.HomePage(resourceKeys)).Methods(http.MethodGet)
 
 	return router, nil
 }

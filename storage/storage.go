@@ -2,21 +2,25 @@ package storage
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"math/rand"
 	"strconv"
 )
 
+var (
+	errResourceInvalidType = errors.New("invalid resource type")
+)
+
 // Storage implements the service interface.
 type Storage struct {
-	file     string
-	key      string
-	singular bool
+	file string
+	key  string
 }
 
 // NewStorage returns a new storage instance.
-func NewStorage(file, key string, singular bool) (*Storage, error) {
-	return &Storage{file: file, key: key, singular: singular}, nil
+func NewStorage(file, key string) (*Storage, error) {
+	return &Storage{file: file, key: key}, nil
 }
 
 // Find all resources for the specific key.
@@ -30,7 +34,7 @@ func (s *Storage) Find() ([]Resource, error) {
 		return nil, ErrResourceNotFound
 	}
 
-	return data[s.key].([]Resource), nil
+	return data[s.key], nil
 }
 
 // FindById a resource for the specific key.
@@ -44,12 +48,7 @@ func (s *Storage) FindById(id string) (Resource, error) {
 		return nil, ErrResourceNotFound
 	}
 
-	// Check if singular endpoint and construct the resource to be returned.
-	if s.singular {
-		return Resource{s.key: data[s.key]}, nil
-	}
-
-	for _, resource := range data[s.key].([]Resource) {
+	for _, resource := range data[s.key] {
 		if resource["id"] == id {
 			return resource, nil
 		}
@@ -71,16 +70,16 @@ func (s *Storage) Create(newResource Resource) (Resource, error) {
 
 	_, ok := newResource["id"]
 	if !ok {
-		newResource["id"] = generateNewId(data[s.key].([]Resource))
+		newResource["id"] = generateNewId(data[s.key])
 	} else {
-		for _, resource := range data[s.key].([]Resource) {
+		for _, resource := range data[s.key] {
 			if resource["id"] == newResource["id"] {
 				return nil, ErrResourceAlreadyExists
 			}
 		}
 	}
 
-	newData := append(data[s.key].([]Resource), newResource)
+	newData := append(data[s.key], newResource)
 	data[s.key] = newData
 
 	if err := updateFile(s.file, data); err != nil {
@@ -109,7 +108,7 @@ func (s *Storage) Replace(id string, replaced Resource) (Resource, error) {
 	replaced["id"] = id
 
 	newResources := make([]Resource, 0)
-	for _, d := range data[s.key].([]Resource) {
+	for _, d := range data[s.key] {
 		if d["id"] == id {
 			newResources = append(newResources, replaced)
 		} else {
@@ -151,7 +150,7 @@ func (s *Storage) Update(id string, updatedReq Resource) (Resource, error) {
 	updated["id"] = id
 
 	newResources := make([]Resource, 0)
-	for _, d := range data[s.key].([]Resource) {
+	for _, d := range data[s.key] {
 		if d["id"] == id {
 			newResources = append(newResources, updated)
 		} else {
@@ -185,7 +184,7 @@ func (s *Storage) Delete(id string) error {
 	}
 
 	newResources := make([]Resource, 0)
-	for _, d := range data[s.key].([]Resource) {
+	for _, d := range data[s.key] {
 		if d["id"] == id {
 			continue
 		}
@@ -210,42 +209,41 @@ func readFile(file string) (Database, error) {
 		return nil, err
 	}
 
-	content := map[string]interface{}{}
+	content := make(map[string]interface{})
 	if err = json.Unmarshal(contentBytes, &content); err != nil {
 		return nil, err
 	}
 
-	contentResource := make(Database)
+	database := make(Database)
 	for key, val := range content {
+		valResources, ok := val.([]interface{})
+		if !ok {
+			return nil, errResourceInvalidType
+		}
+
 		data := make([]Resource, 0)
-
-		switch v := val.(type) {
-		case []interface{}:
-			for _, resource := range v {
-				resourceBytes, err := json.Marshal(resource)
-				if err != nil {
-					return nil, err
-				}
-
-				var newResource Resource
-				if err := json.Unmarshal(resourceBytes, &newResource); err != nil {
-					return nil, err
-				}
-
-				data = append(data, newResource)
+		for _, resource := range valResources {
+			resourceBytes, err := json.Marshal(resource)
+			if err != nil {
+				return nil, err
 			}
 
-			contentResource[key] = data
-		default:
-			contentResource[key] = v
+			var newResource Resource
+			if err := json.Unmarshal(resourceBytes, &newResource); err != nil {
+				return nil, err
+			}
+
+			data = append(data, newResource)
 		}
+
+		database[key] = data
 	}
 
-	return contentResource, nil
+	return database, nil
 }
 
 // updateFile formats and writes the new data to the watch file.
-func updateFile(file string, content map[string]interface{}) error {
+func updateFile(file string, content Database) error {
 	contentBytes, err := json.MarshalIndent(content, "", "  ")
 	if err != nil {
 		return err
@@ -275,8 +273,8 @@ func generateNewId(data []Resource) string {
 }
 
 // checkResourceKeyExists in the file data.
-func checkResourceKeyExists(data map[string]interface{}, key string) error {
-	if _, ok := data[key]; !ok {
+func checkResourceKeyExists(database Database, key string) error {
+	if _, ok := database[key]; !ok {
 		return ErrResourceNotFound
 	}
 

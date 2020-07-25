@@ -36,48 +36,35 @@ const homePageTemplate = `
 			</br>
 
 			<h2>Resources</h2>
-			{{ range $resource, $singular := . }}
-				{{ if $singular }}
-					/{{ $resource }}
-					<span 
-						class="badge badge-secondary"
-						data-toggle="tooltip" 
-						data-html="true"
-						data-placement="right" 
-						title="<ul><li>GET /{{ $resource }}</li></ul>"
-					>
-						1
-					</span>
-				{{ else }}
-					/{{ $resource }}
-					<span 
-						class="badge badge-secondary"
-						data-toggle="tooltip" 
-						data-html="true"
-						data-placement="right" 
-						title="<ul><li>GET /{{ $resource }}</li><li>GET /{{ $resource }}/:id</li><li>POST /{{ $resource }}</li><li>PUT /{{ $resource }}/:id</li><li>PATCH /{{ $resource }}/:id</li><li>DELETE /{{ $resource }}/:id</li></ul>"
-					>
-						5
-					</span>
-				{{ end }}
-				</br>
-			{{ end }}
-
-			/db
+			{{ range . }}
+				/{{ . }}
 				<span 
 					class="badge badge-secondary"
 					data-toggle="tooltip" 
 					data-html="true"
 					data-placement="right" 
-					title="<ul><li>GET /db</li></ul>"
+					title="<ul><li>GET /{{ . }}</li><li>GET /{{ . }}/:id</li><li>POST /{{ . }}</li><li>PUT /{{ . }}/:id</li><li>PATCH /{{ . }}/:id</li><li>DELETE /{{ . }}/:id</li></ul>"
 				>
-					1
+					6
 				</span>
+				</br>
+			{{ end }}
+
+			/db
+			<span 
+				class="badge badge-secondary"
+				data-toggle="tooltip" 
+				data-html="true"
+				data-placement="right" 
+				title="<ul><li>GET /db</li></ul>"
+			>
+				1
+			</span>
 		</div>
 
 		<footer class="fixed-bottom text-center mb-3">
 			<a href="https://github.com/chanioxaris/json-server" target="_blank">
-				github.com/chanioxaris/json-server
+				<img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub mark" width="56" height="56">
 			</a>
 		</footer>
 
@@ -98,7 +85,7 @@ const homePageTemplate = `
 `
 
 // HomePage renders the home page template with useful information about generated endpoints and resources.
-func HomePage(storageResources map[string]bool) http.HandlerFunc {
+func HomePage(resourceKeys []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		t, err := template.New("home").Parse(homePageTemplate)
 		if err != nil {
@@ -106,7 +93,7 @@ func HomePage(storageResources map[string]bool) http.HandlerFunc {
 			return
 		}
 
-		if err = t.Execute(w, storageResources); err != nil {
+		if err = t.Execute(w, resourceKeys); err != nil {
 			web.Error(w, http.StatusBadRequest, storage.ErrInternalServerError.Error())
 			return
 		}

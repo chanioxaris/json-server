@@ -18,8 +18,7 @@ import (
 var (
 	mockServer *httptest.Server
 
-	pluralKeys   = []string{"plural_key_1", "plural_key_2"}
-	singularKeys = []string{"singular_key"}
+	pluralKeys = []string{"plural_key_1", "plural_key_2"}
 
 	testData = make(storage.Database)
 
@@ -52,7 +51,7 @@ func testMain(m *testing.M) int {
 	return m.Run()
 }
 
-func testGenerateJSONFile() (map[string]bool, error) {
+func testGenerateJSONFile() ([]string, error) {
 	f, err := ioutil.TempFile(".", "")
 	if err != nil {
 		return nil, err
@@ -60,7 +59,7 @@ func testGenerateJSONFile() (map[string]bool, error) {
 
 	fileName = f.Name()
 
-	contentBytes, storageResources, err := testGenerateData()
+	contentBytes, resourceKeys, err := testGenerateData()
 	if err != nil {
 		return nil, err
 	}
@@ -69,11 +68,11 @@ func testGenerateJSONFile() (map[string]bool, error) {
 		return nil, err
 	}
 
-	return storageResources, nil
+	return resourceKeys, nil
 }
 
-func testGenerateData() ([]byte, map[string]bool, error) {
-	storageResources := make(map[string]bool)
+func testGenerateData() ([]byte, []string, error) {
+	resourceKeys := make([]string, 0)
 
 	for _, key := range pluralKeys {
 		resources := make([]storage.Resource, 0)
@@ -88,12 +87,7 @@ func testGenerateData() ([]byte, map[string]bool, error) {
 		}
 
 		testData[key] = resources
-		storageResources[key] = false
-	}
-
-	for _, key := range singularKeys {
-		testData[key] = rand.Intn(1000)
-		storageResources[key] = true
+		resourceKeys = append(resourceKeys, key)
 	}
 
 	contentBytes, err := json.MarshalIndent(testData, "", "  ")
@@ -101,7 +95,7 @@ func testGenerateData() ([]byte, map[string]bool, error) {
 		return nil, nil, err
 	}
 
-	return contentBytes, storageResources, nil
+	return contentBytes, resourceKeys, nil
 }
 
 func testResetData(filename string) error {

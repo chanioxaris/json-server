@@ -34,8 +34,7 @@ Create a `db.json` file with your desired data
            "published": 1866,
            "author": "Fyodor Dostoevsky"
          }
-       ],
-      "version": 1
+       ]
     }
     
 Start JSON Server
@@ -51,22 +50,15 @@ If you navigate to http://localhost:8080/posts/1, you will get
     }
 
 ## Routes
-Based on the previous json file, some default routes will be generated
-
-### Plural routes
+Based on the previous json file and for each resource, the below routes will be generated
 
 ````
-GET     /posts
-GET     /posts/{id}
-POST    /posts
-PUT     /posts/{id}
-PATCH   /posts/{id}
-DELETE  /posts/{id}
-````
-### Singular routes
-
-````
-GET /version
+GET     /<resource>
+GET     /<resource>/:id
+POST    /<resource>
+PUT     /<resource>/:id
+PATCH   /<resource>/:id
+DELETE  /<resource>/:id
 ````
 
 When doing requests, it's good to know that:

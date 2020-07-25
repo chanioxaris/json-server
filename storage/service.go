@@ -20,7 +20,7 @@ var (
 type Resource map[string]interface{}
 
 // Database represents the structure of the storage contents.
-type Database map[string]interface{}
+type Database map[string][]Resource
 
 // Service interface to handle storage operations.
 type Service interface {

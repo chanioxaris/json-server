@@ -38,7 +38,6 @@ func TestFind(t *testing.T) {
 
 	type args struct {
 		key      string
-		singular bool
 		filename string
 	}
 	testCases := []struct {
@@ -51,7 +50,6 @@ func TestFind(t *testing.T) {
 			name: "List all resources of specific key",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 		},
@@ -59,7 +57,6 @@ func TestFind(t *testing.T) {
 			name: "List all resources of invalid key",
 			args: args{
 				key:      "randomKey",
-				singular: false,
 				filename: f.Name(),
 			},
 			wantErr: true,
@@ -69,7 +66,6 @@ func TestFind(t *testing.T) {
 			name: "List all resources of invalid file name",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: "randomFileName",
 			},
 			wantErr: true,
@@ -78,7 +74,7 @@ func TestFind(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key, tt.args.singular)
+		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -119,7 +115,6 @@ func TestFindById(t *testing.T) {
 
 	type args struct {
 		key      string
-		singular bool
 		filename string
 	}
 	testCases := []struct {
@@ -134,7 +129,6 @@ func TestFindById(t *testing.T) {
 			name: "Read resource with id",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			id:           randomResource["id"].(string),
@@ -144,7 +138,6 @@ func TestFindById(t *testing.T) {
 			name: "Read resource of invalid id",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			id:      "randomId",
@@ -155,7 +148,6 @@ func TestFindById(t *testing.T) {
 			name: "Read resource of invalid resource key",
 			args: args{
 				key:      "randomKey",
-				singular: false,
 				filename: f.Name(),
 			},
 			wantErr: true,
@@ -165,7 +157,6 @@ func TestFindById(t *testing.T) {
 			name: "Read resource of invalid file name",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: "randomFileName",
 			},
 			wantErr: true,
@@ -174,7 +165,7 @@ func TestFindById(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key, tt.args.singular)
+		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -211,7 +202,6 @@ func TestCreate(t *testing.T) {
 
 	type args struct {
 		key      string
-		singular bool
 		filename string
 	}
 	testCases := []struct {
@@ -225,7 +215,6 @@ func TestCreate(t *testing.T) {
 			name: "Create resource with id provided",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
@@ -238,7 +227,6 @@ func TestCreate(t *testing.T) {
 			name: "Create resource without id provided",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
@@ -250,7 +238,6 @@ func TestCreate(t *testing.T) {
 			name: "Create invalid resource with existing id",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
@@ -265,7 +252,6 @@ func TestCreate(t *testing.T) {
 			name: "Create resource of invalid resource key",
 			args: args{
 				key:      "randomKey",
-				singular: false,
 				filename: f.Name(),
 			},
 			wantErr: true,
@@ -275,7 +261,6 @@ func TestCreate(t *testing.T) {
 			name: "Create resource of invalid file name",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: "randomFileName",
 			},
 			wantErr: true,
@@ -288,7 +273,7 @@ func TestCreate(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key, tt.args.singular)
+		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -340,7 +325,6 @@ func TestReplace(t *testing.T) {
 
 	type args struct {
 		key      string
-		singular bool
 		filename string
 	}
 	testCases := []struct {
@@ -355,7 +339,6 @@ func TestReplace(t *testing.T) {
 			name: "Replace resource without id provided",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
@@ -368,7 +351,6 @@ func TestReplace(t *testing.T) {
 			name: "Replace resource with id provided",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
@@ -382,7 +364,6 @@ func TestReplace(t *testing.T) {
 			name: "Replace resource with non existing id",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
@@ -397,7 +378,6 @@ func TestReplace(t *testing.T) {
 			name: "Replace resource of invalid resource key",
 			args: args{
 				key:      "randomKey",
-				singular: false,
 				filename: f.Name(),
 			},
 			wantErr: true,
@@ -407,7 +387,6 @@ func TestReplace(t *testing.T) {
 			name: "Replace resource of invalid file name",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: "randomFileName",
 			},
 			wantErr: true,
@@ -420,7 +399,7 @@ func TestReplace(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key, tt.args.singular)
+		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -473,7 +452,6 @@ func TestUpdate(t *testing.T) {
 
 	type args struct {
 		key      string
-		singular bool
 		filename string
 	}
 	testCases := []struct {
@@ -488,7 +466,6 @@ func TestUpdate(t *testing.T) {
 			name: "Update resource without id provided",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
@@ -500,7 +477,6 @@ func TestUpdate(t *testing.T) {
 			name: "Update resource with id provided",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
@@ -513,7 +489,6 @@ func TestUpdate(t *testing.T) {
 			name: "Update resource with non existing id",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			resource: storage.Resource{
@@ -527,7 +502,6 @@ func TestUpdate(t *testing.T) {
 			name: "Update resource of invalid resource key",
 			args: args{
 				key:      "randomKey",
-				singular: false,
 				filename: f.Name(),
 			},
 			wantErr: true,
@@ -537,7 +511,6 @@ func TestUpdate(t *testing.T) {
 			name: "Update resource of invalid file name",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: "randomFileName",
 			},
 			wantErr: true,
@@ -550,7 +523,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key, tt.args.singular)
+		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -605,7 +578,6 @@ func TestDelete(t *testing.T) {
 
 	type args struct {
 		key      string
-		singular bool
 		filename string
 	}
 	testCases := []struct {
@@ -619,7 +591,6 @@ func TestDelete(t *testing.T) {
 			name: "Delete resource with id",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			id: randomResource["id"].(string),
@@ -628,7 +599,6 @@ func TestDelete(t *testing.T) {
 			name: "Delete resource of invalid id",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: f.Name(),
 			},
 			id:      "randomId",
@@ -639,7 +609,6 @@ func TestDelete(t *testing.T) {
 			name: "Delete resource of invalid resource key",
 			args: args{
 				key:      "randomKey",
-				singular: false,
 				filename: f.Name(),
 			},
 			wantErr: true,
@@ -649,7 +618,6 @@ func TestDelete(t *testing.T) {
 			name: "Delete resource of invalid file name",
 			args: args{
 				key:      randomKey,
-				singular: false,
 				filename: "randomFileName",
 			},
 			wantErr: true,
@@ -658,7 +626,7 @@ func TestDelete(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key, tt.args.singular)
+		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -701,7 +669,6 @@ func TestDB(t *testing.T) {
 
 	type args struct {
 		key      string
-		singular bool
 		filename string
 	}
 	testCases := []struct {
@@ -713,14 +680,13 @@ func TestDB(t *testing.T) {
 			name: "Get database",
 			args: args{
 				key:      "",
-				singular: false,
 				filename: f.Name(),
 			},
 		},
 	}
 
 	for _, tt := range testCases {
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key, tt.args.singular)
+		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}

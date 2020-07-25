@@ -27,17 +27,17 @@ var rootCmd = &cobra.Command{
 	Use:   "json-server",
 	Short: "Create a dummy REST API from a json file with zero coding within seconds",
 	Long: `json-server is a cross-platform CLI tool to create within seconds a dummy REST API from a provided json 
-			file. Depending on the provided file some default http endpoints are created. For array data (plural) a GET, 
-			GET by ID, POST, PUT by ID, PATCH by ID and DELETE by ID endpoints are available. For object data (singular) 
-			a GET endpoint is available`,
+			file. Depending on the provided data, http endpoints are created which include GET, GET by ID, POST, 
+			PUT by ID, PATCH by ID and DELETE by ID. Only array type data is supported`,
 	RunE: run,
 }
 
 var (
-	errFailedParseFlag   = errors.New("failed to parse flag")
-	errFailedParseFile   = errors.New("failed to parse file")
-	errFileNotFound      = errors.New("unable to find requested file")
-	errFailedStartServer = errors.New("failed to start JSON server. Maybe port already in use")
+	errFailedParseFlag     = errors.New("failed to parse flag")
+	errFailedParseFile     = errors.New("failed to parse file")
+	errFileNotFound        = errors.New("unable to find requested file")
+	errUnsupportedResource = errors.New("only array type resources are supported")
+	errFailedStartServer   = errors.New("failed to start JSON server. Maybe port already in use")
 )
 
 func init() {
@@ -79,14 +79,14 @@ func run(cmd *cobra.Command, _ []string) error {
 	// Setup logger.
 	logger.Setup(logs)
 
-	// Get storage resources.
-	storageResources, err := getStorageResources(file)
+	// Get resource keys.
+	resourceKeys, err := getResourceKeys(file)
 	if err != nil {
 		return err
 	}
 
 	// Setup API handler.
-	apiHandler, err := handler.Setup(storageResources, file)
+	apiHandler, err := handler.Setup(resourceKeys, file)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	go api.Serve(listener)
 
 	// Display info about available resources and home page.
-	displayInfo(storageResources, port)
+	displayInfo(resourceKeys, port)
 
 	gracefulShutdown(api)
 
@@ -140,7 +140,7 @@ func gracefulShutdown(server *http.Server) {
 	fmt.Println("gracefully shutting down server")
 }
 
-func getStorageResources(filename string) (map[string]bool, error) {
+func getResourceKeys(filename string) ([]string, error) {
 	// Read file contents used as storage.
 	contentBytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -152,27 +152,27 @@ func getStorageResources(filename string) (map[string]bool, error) {
 		return nil, fmt.Errorf("%w: %s", errFailedParseFile, filename)
 	}
 
-	storageKeys := make(map[string]bool)
+	resourceKeys := make([]string, 0)
 
-	// Range on content to retrieve resource keys and type (plural, singular).
+	// Range on content to retrieve resource keys.
 	for resource, data := range content {
 		switch reflect.TypeOf(data).Kind() {
 		case reflect.Slice:
-			storageKeys[resource] = false
+			resourceKeys = append(resourceKeys, resource)
 		default:
-			storageKeys[resource] = true
+			return nil, errUnsupportedResource
 		}
 	}
 
-	return storageKeys, nil
+	return resourceKeys, nil
 }
 
-func displayInfo(storageResources map[string]bool, port string) {
+func displayInfo(resourceKeys []string, port string) {
 	fmt.Println("JSON Server successfully running")
 	fmt.Println()
 
 	fmt.Println("Resources")
-	for resource := range storageResources {
+	for _, resource := range resourceKeys {
 		fmt.Printf("http://localhost:%s/%s\n", port, resource)
 	}
 
