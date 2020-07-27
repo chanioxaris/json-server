@@ -26,7 +26,7 @@ jobs:
         with:
           go-version: 1.14
       - name: Test
-        run: go test ./... -coverprofile "coverage.out"
+        run: go test ./... -coverprofile coverage.out.tmp && cat coverage.out.tmp | grep -v "mock.go" > coverage.out
         env:
           CGO_ENABLED: 0
       - name: Upload coverage report to CodeCov
