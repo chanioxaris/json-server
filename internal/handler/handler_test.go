@@ -79,13 +79,6 @@ func testCreateResourceStorage(resourceKeys []string) (map[string]storage.Storag
 		resourceStorage[resourceKey] = storageSvc
 	}
 
-	storageSvcDB, err := storage.NewMock(testData, "")
-	if err != nil {
-		return nil, errors.New("failed to initialize resources")
-	}
-
-	resourceStorage["db"] = storageSvcDB
-
 	for key, storageSvc := range resourceStorage {
 		testResourceStorage[key] = storageSvc.(*storage.Mock)
 	}

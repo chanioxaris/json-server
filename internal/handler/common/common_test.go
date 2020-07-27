@@ -25,12 +25,11 @@ var (
 func TestMain(m *testing.M) {
 	rand.Seed(time.Now().UnixNano())
 
-	resourceKeys, err := testGenerateData()
-	if err != nil {
+	if err := testGenerateData(); err != nil {
 		panic(err)
 	}
 
-	resourceStorage, err := testCreateResourceStorage(resourceKeys)
+	resourceStorage, err := testCreateResourceStorage()
 	if err != nil {
 		panic(err)
 	}
@@ -43,9 +42,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func testGenerateData() ([]string, error) {
-	resourceKeys := make([]string, 0)
-
+func testGenerateData() error {
 	for _, key := range testResourceKeys {
 		resources := make([]storage.Resource, 0)
 		for idx := 0; idx < rand.Intn(10)+1; idx++ {
@@ -59,23 +56,13 @@ func testGenerateData() ([]string, error) {
 		}
 
 		testData[key] = resources
-		resourceKeys = append(resourceKeys, key)
 	}
 
-	return resourceKeys, nil
+	return nil
 }
 
-func testCreateResourceStorage(resourceKeys []string) (map[string]storage.Storage, error) {
+func testCreateResourceStorage() (map[string]storage.Storage, error) {
 	resourceStorage := make(map[string]storage.Storage)
-
-	for _, resourceKey := range resourceKeys {
-		storageSvc, err := storage.NewMock(testData, resourceKey)
-		if err != nil {
-			return nil, errors.New("failed to initialize resources")
-		}
-
-		resourceStorage[resourceKey] = storageSvc
-	}
 
 	storageSvcDB, err := storage.NewMock(testData, "")
 	if err != nil {
