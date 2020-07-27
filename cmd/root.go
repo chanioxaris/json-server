@@ -18,8 +18,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/chanioxaris/json-server/handler"
-	"github.com/chanioxaris/json-server/logger"
+	"github.com/chanioxaris/json-server/internal/handler"
+	"github.com/chanioxaris/json-server/internal/logger"
+	"github.com/chanioxaris/json-server/internal/storage"
 )
 
 // rootCmd represents the base command when called without any sub commands.
@@ -38,6 +39,7 @@ var (
 	errFileNotFound        = errors.New("unable to find requested file")
 	errUnsupportedResource = errors.New("only array type resources are supported")
 	errFailedStartServer   = errors.New("failed to start JSON server. Maybe port already in use")
+	errFailedInitResources = errors.New("failed to initialize resources")
 )
 
 func init() {
@@ -85,15 +87,16 @@ func run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	// Setup API handler.
-	apiHandler, err := handler.Setup(resourceKeys, file)
+	// Create storage service for each resource.
+	resourceStorage, err := createResourceStorage(resourceKeys, file)
 	if err != nil {
 		return err
 	}
 
+	// Setup API server.
 	api := &http.Server{
 		Addr:    ":" + port,
-		Handler: apiHandler,
+		Handler: handler.Setup(resourceStorage),
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
@@ -165,6 +168,29 @@ func getResourceKeys(filename string) ([]string, error) {
 	}
 
 	return resourceKeys, nil
+}
+
+func createResourceStorage(resourceKeys []string, file string) (map[string]storage.Service, error) {
+	resourceStorage := make(map[string]storage.Service)
+
+	for _, resourceKey := range resourceKeys {
+		storageSvc, err := storage.New(file, resourceKey)
+		if err != nil {
+			return nil, errFailedInitResources
+		}
+
+		resourceStorage[resourceKey] = storageSvc
+	}
+
+	// Create storage service for common db endpoint.
+	storageSvcDB, err := storage.New(file, "")
+	if err != nil {
+		return nil, errFailedInitResources
+	}
+
+	resourceStorage["db"] = storageSvcDB
+
+	return resourceStorage, nil
 }
 
 func displayInfo(resourceKeys []string, port string) {

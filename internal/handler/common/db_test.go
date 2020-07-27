@@ -1,31 +1,26 @@
-package handler_test
+package common_test
 
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
+	"io/ioutil"
 	"net/http"
 	"reflect"
 	"testing"
 
-	"github.com/chanioxaris/json-server/storage"
+	"github.com/chanioxaris/json-server/internal/storage"
 )
 
-func TestList(t *testing.T) {
-	randomKeyIndex := rand.Intn(len(pluralKeys))
-	randomKey := pluralKeys[randomKeyIndex]
-
+func TestDB(t *testing.T) {
 	testCases := []struct {
 		name         string
 		statusCode   int
-		key          string
-		expectedData interface{}
+		expectedData storage.Database
 	}{
 		{
-			name:         "List resources",
+			name:         "Get db",
 			statusCode:   http.StatusOK,
-			key:          randomKey,
-			expectedData: testData[randomKey],
+			expectedData: testData,
 		},
 	}
 
@@ -34,7 +29,7 @@ func TestList(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		url := fmt.Sprintf("%s/%s", mockServer.URL, tt.key)
+		url := fmt.Sprintf("%s/db", mockServer.URL)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		if err != nil {
@@ -50,13 +45,18 @@ func TestList(t *testing.T) {
 			t.Fatalf("expected status code %v, but got %v", tt.statusCode, resp.StatusCode)
 		}
 
-		var body []storage.Resource
-		if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
 			t.Fatal(err)
 		}
 
-		if !reflect.DeepEqual(body, tt.expectedData) {
-			t.Fatalf("expected body %v, but got %v", tt.expectedData, body)
+		expectedDataBytes, err := json.Marshal(tt.expectedData)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if !reflect.DeepEqual(bodyBytes, expectedDataBytes) {
+			t.Fatalf("expected body %v, but got %v", expectedDataBytes, bodyBytes)
 		}
 	}
 }

@@ -5,18 +5,13 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/gorilla/mux"
-
-	"github.com/chanioxaris/json-server/storage"
-	"github.com/chanioxaris/json-server/web"
+	"github.com/chanioxaris/json-server/internal/storage"
+	"github.com/chanioxaris/json-server/internal/web"
 )
 
-// Update operates as a http handler, to update an existing resource.
-func Update(storageSvc storage.Service) http.HandlerFunc {
+// Create operates as a http handler, to add a new resource.
+func Create(storageSvc storage.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Read request path parameter id.
-		id := mux.Vars(r)["id"]
-
 		// Read and decode request body.
 		var newResource storage.Resource
 		if err := json.NewDecoder(r.Body).Decode(&newResource); err != nil {
@@ -30,12 +25,12 @@ func Update(storageSvc storage.Service) http.HandlerFunc {
 			return
 		}
 
-		// Update the resource.
-		data, err := storageSvc.Update(id, newResource)
+		// Create the new resource.
+		data, err := storageSvc.Create(newResource)
 		if err != nil {
-			// Resource not found.
-			if errors.Is(err, storage.ErrResourceNotFound) {
-				web.Error(w, http.StatusNotFound, err.Error())
+			// Already exists with the requested id.
+			if errors.Is(err, storage.ErrResourceAlreadyExists) {
+				web.Error(w, http.StatusConflict, err.Error())
 				return
 			}
 
@@ -43,6 +38,6 @@ func Update(storageSvc storage.Service) http.HandlerFunc {
 			return
 		}
 
-		web.Success(w, http.StatusOK, data)
+		web.Success(w, http.StatusCreated, data)
 	}
 }

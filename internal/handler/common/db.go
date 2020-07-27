@@ -5,8 +5,8 @@ package common
 import (
 	"net/http"
 
-	"github.com/chanioxaris/json-server/storage"
-	"github.com/chanioxaris/json-server/web"
+	"github.com/chanioxaris/json-server/internal/storage"
+	"github.com/chanioxaris/json-server/internal/web"
 )
 
 // DB operates as a http handler, to list db content.

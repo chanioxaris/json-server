@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/chanioxaris/json-server/storage"
+	"github.com/chanioxaris/json-server/internal/storage"
 )
 
 func TestRead_Plural(t *testing.T) {

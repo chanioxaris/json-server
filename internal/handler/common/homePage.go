@@ -4,8 +4,8 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/chanioxaris/json-server/storage"
-	"github.com/chanioxaris/json-server/web"
+	"github.com/chanioxaris/json-server/internal/storage"
+	"github.com/chanioxaris/json-server/internal/web"
 )
 
 const homePageTemplate = `
@@ -36,18 +36,22 @@ const homePageTemplate = `
 			</br>
 
 			<h2>Resources</h2>
-			{{ range . }}
-				/{{ . }}
-				<span 
-					class="badge badge-secondary"
-					data-toggle="tooltip" 
-					data-html="true"
-					data-placement="right" 
-					title="<ul><li>GET /{{ . }}</li><li>GET /{{ . }}/:id</li><li>POST /{{ . }}</li><li>PUT /{{ . }}/:id</li><li>PATCH /{{ . }}/:id</li><li>DELETE /{{ . }}/:id</li></ul>"
-				>
-					6
-				</span>
-				</br>
+			{{ range $resourceKey, $val := . }}
+				{{ with $resourceKey }}
+					{{ if ne . "db" }}
+						/{{ . }}
+						<span 
+							class="badge badge-secondary"
+							data-toggle="tooltip" 
+							data-html="true"
+							data-placement="right" 
+							title="<ul><li>GET /{{ . }}</li><li>GET /{{ . }}/:id</li><li>POST /{{ . }}</li><li>PUT /{{ . }}/:id</li><li>PATCH /{{ . }}/:id</li><li>DELETE /{{ . }}/:id</li></ul>"
+						>
+							6
+						</span>
+						</br>
+					{{ end }}
+				{{ end }}
 			{{ end }}
 
 			/db
@@ -85,7 +89,7 @@ const homePageTemplate = `
 `
 
 // HomePage renders the home page template with useful information about generated endpoints and resources.
-func HomePage(resourceKeys []string) http.HandlerFunc {
+func HomePage(resourceStorage map[string]storage.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		t, err := template.New("home").Parse(homePageTemplate)
 		if err != nil {
@@ -93,7 +97,7 @@ func HomePage(resourceKeys []string) http.HandlerFunc {
 			return
 		}
 
-		if err = t.Execute(w, resourceKeys); err != nil {
+		if err = t.Execute(w, resourceStorage); err != nil {
 			web.Error(w, http.StatusBadRequest, storage.ErrInternalServerError.Error())
 			return
 		}

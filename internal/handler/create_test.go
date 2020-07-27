@@ -9,10 +9,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/chanioxaris/json-server/storage"
+	"github.com/chanioxaris/json-server/internal/storage"
 )
 
-func TestUpdate(t *testing.T) {
+func TestCreate(t *testing.T) {
 	randomKeyIndex := rand.Intn(len(pluralKeys))
 	randomKey := pluralKeys[randomKeyIndex]
 
@@ -27,70 +27,58 @@ func TestUpdate(t *testing.T) {
 		name       string
 		statusCode int
 		key        string
-		id         string
 		body       storage.Resource
 		wantErr    bool
 		err        error
 	}{
 		{
-			name:       "Update resource with id provided in body",
-			statusCode: http.StatusOK,
+			name:       "Create resource with id provided",
+			statusCode: http.StatusCreated,
 			key:        randomKey,
-			id:         randomResource["id"].(string),
-			body: storage.Resource{
-				"id":      randomResource["id"].(string),
-				"field_1": "updated-field_1",
-			},
-		},
-		{
-			name:       "Update resource with different id provided in body",
-			statusCode: http.StatusOK,
-			key:        randomKey,
-			id:         randomResource["id"].(string),
 			body: storage.Resource{
 				"id":      "2020",
-				"field_2": "updated-field_2",
+				"field_1": "new-field_1",
+				"field_2": "new-field_2",
 			},
 		},
 		{
-			name:       "Update resource without id provided in body",
-			statusCode: http.StatusOK,
+			name:       "Create resource without id provided",
+			statusCode: http.StatusCreated,
 			key:        randomKey,
-			id:         randomResource["id"].(string),
 			body: storage.Resource{
-				"field_1": "updated-field_1",
+				"field_1": "new-field_1",
+				"field_2": "new-field_2",
 			},
 		},
 		{
-			name:       "Update resource with empty body",
+			name:       "Create resource with empty body",
 			statusCode: http.StatusBadRequest,
 			key:        randomKey,
 			body:       nil,
-			id:         randomResource["id"].(string),
 			wantErr:    true,
 			err:        storage.ErrBadRequest,
 		},
 		{
-			name:       "Update resource with body contains only id",
+			name:       "Create resource with body contains only id",
 			statusCode: http.StatusBadRequest,
 			key:        randomKey,
 			body: storage.Resource{
-				"id": randomResource["id"].(string),
+				"id": "2020",
 			},
-			id:      randomResource["id"].(string),
 			wantErr: true,
 			err:     storage.ErrBadRequest,
 		},
 		{
-			name:       "Update resource with not existing id",
-			statusCode: http.StatusNotFound,
+			name:       "Create invalid resource with existing id",
+			statusCode: http.StatusConflict,
 			key:        randomKey,
 			body: storage.Resource{
-				"field_2": "updated-field_2",
+				"id":      randomResource["id"],
+				"field_1": "new-field_1",
+				"field_2": "new-field_2",
 			},
-			id:      "randomId",
 			wantErr: true,
-			err:     storage.ErrResourceNotFound,
+			err:     storage.ErrResourceAlreadyExists,
 		},
 	}
 
@@ -99,14 +87,14 @@ func TestUpdate(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		url := fmt.Sprintf("%s/%s/%s", mockServer.URL, tt.key, tt.id)
+		url := fmt.Sprintf("%s/%s", mockServer.URL, tt.key)
 
 		bodyBytes, err := json.Marshal(tt.body)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		req, err := http.NewRequest(http.MethodPatch, url, bytes.NewReader(bodyBytes))
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(bodyBytes))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -133,7 +121,7 @@ func TestUpdate(t *testing.T) {
 
 			expectedData := make([]storage.Resource, len(testData[randomKey].([]storage.Resource)))
 			copy(expectedData, testData[randomKey].([]storage.Resource))
-			expectedData[randomResourceIndex] = got
+			expectedData = append(expectedData, got)
 
 			if !reflect.DeepEqual(resources, expectedData) {
 				t.Fatalf("expected data %v, but got %v", expectedData, resources)

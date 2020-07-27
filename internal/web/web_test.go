@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/chanioxaris/json-server/web"
+	"github.com/chanioxaris/json-server/internal/web"
 )
 
 func TestSuccess(t *testing.T) {

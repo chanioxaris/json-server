@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/chanioxaris/json-server/storage"
+	"github.com/chanioxaris/json-server/internal/storage"
 )
 
 func TestDelete(t *testing.T) {

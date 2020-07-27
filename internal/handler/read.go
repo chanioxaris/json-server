@@ -6,8 +6,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/chanioxaris/json-server/storage"
-	"github.com/chanioxaris/json-server/web"
+	"github.com/chanioxaris/json-server/internal/storage"
+	"github.com/chanioxaris/json-server/internal/web"
 )
 
 // Read operates as a http handler, to return the requested resource by id.

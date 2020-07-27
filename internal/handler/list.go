@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/chanioxaris/json-server/storage"
-	"github.com/chanioxaris/json-server/web"
+	"github.com/chanioxaris/json-server/internal/storage"
+	"github.com/chanioxaris/json-server/internal/web"
 )
 
 // List operates as a http handler, to return all available resources.

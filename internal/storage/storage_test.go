@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chanioxaris/json-server/storage"
+	"github.com/chanioxaris/json-server/internal/storage"
 )
 
 var (
@@ -74,7 +74,7 @@ func TestFind(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
+		storageSvc, err := storage.New(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -165,7 +165,7 @@ func TestFindById(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
+		storageSvc, err := storage.New(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -273,7 +273,7 @@ func TestCreate(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
+		storageSvc, err := storage.New(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -399,7 +399,7 @@ func TestReplace(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
+		storageSvc, err := storage.New(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -523,7 +523,7 @@ func TestUpdate(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
+		storageSvc, err := storage.New(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -626,7 +626,7 @@ func TestDelete(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
+		storageSvc, err := storage.New(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -686,7 +686,7 @@ func TestDB(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		storageSvc, err := storage.NewStorage(tt.args.filename, tt.args.key)
+		storageSvc, err := storage.New(tt.args.filename, tt.args.key)
 		if err != nil {
 			t.Fatal(err)
 		}

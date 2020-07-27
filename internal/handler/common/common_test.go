@@ -1,19 +1,19 @@
-package handler_test
+package common_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
-	"net/http"
 	"net/http/httptest"
 	"os"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/chanioxaris/json-server/handler"
-	"github.com/chanioxaris/json-server/storage"
+	"github.com/chanioxaris/json-server/internal/handler"
+	"github.com/chanioxaris/json-server/internal/storage"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 
 	pluralKeys = []string{"plural_key_1", "plural_key_2"}
 
-	testData = make(map[string]interface{})
+	testData = make(storage.Database)
 
 	fileName string
 )
@@ -41,10 +41,12 @@ func testMain(m *testing.M) int {
 	}
 	defer os.Remove(fileName)
 
-	router, err := handler.Setup(resourceKeys, fileName)
+	resourceStorage, err := testCreateResourceStorage(resourceKeys, fileName)
 	if err != nil {
 		panic(err)
 	}
+
+	router := handler.Setup(resourceStorage)
 
 	mockServer = httptest.NewServer(router)
 	defer mockServer.Close()
@@ -99,6 +101,28 @@ func testGenerateData() ([]byte, []string, error) {
 	return contentBytes, resourceKeys, nil
 }
 
+func testCreateResourceStorage(resourceKeys []string, file string) (map[string]storage.Service, error) {
+	resourceStorage := make(map[string]storage.Service)
+
+	for _, resourceKey := range resourceKeys {
+		storageSvc, err := storage.New(file, resourceKey)
+		if err != nil {
+			return nil, errors.New("failed to initialize resources")
+		}
+
+		resourceStorage[resourceKey] = storageSvc
+	}
+
+	storageSvcDB, err := storage.New(file, "")
+	if err != nil {
+		return nil, errors.New("failed to initialize resources")
+	}
+
+	resourceStorage["db"] = storageSvcDB
+
+	return resourceStorage, nil
+}
+
 func testResetData(filename string) error {
 	contentBytes, err := json.Marshal(testData)
 	if err != nil {
@@ -110,25 +134,4 @@ func testResetData(filename string) error {
 	}
 
 	return nil
-}
-
-func testListResourcesByKey(key string) ([]storage.Resource, error) {
-	url := fmt.Sprintf("%s/%s", mockServer.URL, key)
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	var body []storage.Resource
-	if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		return nil, err
-	}
-
-	return body, nil
 }

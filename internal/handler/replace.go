@@ -7,8 +7,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/chanioxaris/json-server/storage"
-	"github.com/chanioxaris/json-server/web"
+	"github.com/chanioxaris/json-server/internal/storage"
+	"github.com/chanioxaris/json-server/internal/web"
 )
 
 // Replace operates as a http handler, to replace an existing resource.

@@ -9,10 +9,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/chanioxaris/json-server/storage"
+	"github.com/chanioxaris/json-server/internal/storage"
 )
 
-func TestCreate(t *testing.T) {
+func TestReplace(t *testing.T) {
 	randomKeyIndex := rand.Intn(len(pluralKeys))
 	randomKey := pluralKeys[randomKeyIndex]
 
@@ -27,58 +27,74 @@ func TestCreate(t *testing.T) {
 		name       string
 		statusCode int
 		key        string
+		id         string
 		body       storage.Resource
 		wantErr    bool
 		err        error
 	}{
 		{
-			name:       "Create resource with id provided",
-			statusCode: http.StatusCreated,
+			name:       "Replace resource with id provided in body",
+			statusCode: http.StatusOK,
 			key:        randomKey,
+			id:         randomResource["id"].(string),
+			body: storage.Resource{
+				"id":      randomResource["id"].(string),
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
+			},
+		},
+		{
+			name:       "Replace resource with different id provided in body",
+			statusCode: http.StatusOK,
+			key:        randomKey,
+			id:         randomResource["id"].(string),
 			body: storage.Resource{
 				"id":      "2020",
-				"field_1": "new-field_1",
-				"field_2": "new-field_2",
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
 			},
 		},
 		{
-			name:       "Create resource without id provided",
-			statusCode: http.StatusCreated,
+			name:       "Replace resource without id provided in body",
+			statusCode: http.StatusOK,
 			key:        randomKey,
+			id:         randomResource["id"].(string),
 			body: storage.Resource{
-				"field_1": "new-field_1",
-				"field_2": "new-field_2",
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
 			},
 		},
 		{
-			name:       "Create resource with empty body",
+			name:       "Replace resource with empty body",
 			statusCode: http.StatusBadRequest,
 			key:        randomKey,
 			body:       nil,
+			id:         randomResource["id"].(string),
 			wantErr:    true,
 			err:        storage.ErrBadRequest,
 		},
 		{
-			name:       "Create resource with body contains only id",
+			name:       "Replace resource with body contains only id",
 			statusCode: http.StatusBadRequest,
 			key:        randomKey,
 			body: storage.Resource{
-				"id": "2020",
+				"id": randomResource["id"].(string),
 			},
+			id:      randomResource["id"].(string),
 			wantErr: true,
 			err:     storage.ErrBadRequest,
 		},
 		{
-			name:       "Create invalid resource with existing id",
-			statusCode: http.StatusConflict,
+			name:       "Replace resource with not existing id",
+			statusCode: http.StatusNotFound,
 			key:        randomKey,
 			body: storage.Resource{
-				"id":      randomResource["id"],
-				"field_1": "new-field_1",
-				"field_2": "new-field_2",
+				"field_1": "replaced-field_1",
+				"field_2": "replaced-field_2",
 			},
+			id:      "randomId",
 			wantErr: true,
-			err:     storage.ErrResourceAlreadyExists,
+			err:     storage.ErrResourceNotFound,
 		},
 	}
 
@@ -87,14 +103,14 @@ func TestCreate(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		url := fmt.Sprintf("%s/%s", mockServer.URL, tt.key)
+		url := fmt.Sprintf("%s/%s/%s", mockServer.URL, tt.key, tt.id)
 
 		bodyBytes, err := json.Marshal(tt.body)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(bodyBytes))
+		req, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(bodyBytes))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -121,7 +137,7 @@ func TestCreate(t *testing.T) {
 
 			expectedData := make([]storage.Resource, len(testData[randomKey].([]storage.Resource)))
 			copy(expectedData, testData[randomKey].([]storage.Resource))
-			expectedData = append(expectedData, got)
+			expectedData[randomResourceIndex] = got
 
 			if !reflect.DeepEqual(resources, expectedData) {
 				t.Fatalf("expected data %v, but got %v", expectedData, resources)

@@ -18,8 +18,8 @@ type Storage struct {
 	key  string
 }
 
-// NewStorage returns a new storage instance.
-func NewStorage(file, key string) (*Storage, error) {
+// New returns a new storage instance.
+func New(file, key string) (*Storage, error) {
 	return &Storage{file: file, key: key}, nil
 }
 
