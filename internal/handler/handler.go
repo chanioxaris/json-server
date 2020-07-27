@@ -14,7 +14,7 @@ import (
 )
 
 // Setup API handler based on provided resources.
-func Setup(resourceStorage map[string]storage.Service) http.Handler {
+func Setup(resourceStorage map[string]storage.Storage) http.Handler {
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(middleware.Recovery)
 	router.Use(middleware.Logger)

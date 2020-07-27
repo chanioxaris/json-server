@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -20,29 +19,20 @@ import (
 var (
 	mockServer *httptest.Server
 
-	pluralKeys = []string{"plural_key_1", "plural_key_2"}
-
-	testData = make(map[string]interface{})
-
-	fileName string
+	testResourceKeys    = []string{"resource_key_1", "resource_key_2"}
+	testData            = make(storage.Database)
+	testResourceStorage = make(map[string]*storage.Mock)
 )
 
 func TestMain(m *testing.M) {
-	// testMain wrapper is needed to support defers and panics.
-	// os.Exit will ignore those and exit silently.
-	os.Exit(testMain(m))
-}
-
-func testMain(m *testing.M) int {
 	rand.Seed(time.Now().UnixNano())
 
-	resourceKeys, err := testGenerateJSONFile()
+	resourceKeys, err := testGenerateData()
 	if err != nil {
 		panic(err)
 	}
-	defer os.Remove(fileName)
 
-	resourceStorage, err := testCreateResourceStorage(resourceKeys, fileName)
+	resourceStorage, err := testCreateResourceStorage(resourceKeys)
 	if err != nil {
 		panic(err)
 	}
@@ -52,33 +42,13 @@ func testMain(m *testing.M) int {
 	mockServer = httptest.NewServer(router)
 	defer mockServer.Close()
 
-	return m.Run()
+	os.Exit(m.Run())
 }
 
-func testGenerateJSONFile() ([]string, error) {
-	f, err := ioutil.TempFile(".", "")
-	if err != nil {
-		return nil, err
-	}
-
-	fileName = f.Name()
-
-	contentBytes, resourceKeys, err := testGenerateData()
-	if err != nil {
-		return nil, err
-	}
-
-	if err = ioutil.WriteFile(f.Name(), contentBytes, 0644); err != nil {
-		return nil, err
-	}
-
-	return resourceKeys, nil
-}
-
-func testGenerateData() ([]byte, []string, error) {
+func testGenerateData() ([]string, error) {
 	resourceKeys := make([]string, 0)
 
-	for _, key := range pluralKeys {
+	for _, key := range testResourceKeys {
 		resources := make([]storage.Resource, 0)
 		for idx := 0; idx < rand.Intn(10)+1; idx++ {
 			newResource := storage.Resource{
@@ -94,19 +64,14 @@ func testGenerateData() ([]byte, []string, error) {
 		resourceKeys = append(resourceKeys, key)
 	}
 
-	contentBytes, err := json.MarshalIndent(testData, "", "  ")
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return contentBytes, resourceKeys, nil
+	return resourceKeys, nil
 }
 
-func testCreateResourceStorage(resourceKeys []string, file string) (map[string]storage.Service, error) {
-	resourceStorage := make(map[string]storage.Service)
+func testCreateResourceStorage(resourceKeys []string) (map[string]storage.Storage, error) {
+	resourceStorage := make(map[string]storage.Storage)
 
 	for _, resourceKey := range resourceKeys {
-		storageSvc, err := storage.New(file, resourceKey)
+		storageSvc, err := storage.NewMock(testData, resourceKey)
 		if err != nil {
 			return nil, errors.New("failed to initialize resources")
 		}
@@ -114,27 +79,22 @@ func testCreateResourceStorage(resourceKeys []string, file string) (map[string]s
 		resourceStorage[resourceKey] = storageSvc
 	}
 
-	storageSvcDB, err := storage.New(file, "")
+	storageSvcDB, err := storage.NewMock(testData, "")
 	if err != nil {
 		return nil, errors.New("failed to initialize resources")
 	}
 
 	resourceStorage["db"] = storageSvcDB
 
+	for key, storageSvc := range resourceStorage {
+		testResourceStorage[key] = storageSvc.(*storage.Mock)
+	}
+
 	return resourceStorage, nil
 }
 
-func testResetData(filename string) error {
-	contentBytes, err := json.Marshal(testData)
-	if err != nil {
-		return err
-	}
-
-	if err := ioutil.WriteFile(filename, contentBytes, 0644); err != nil {
-		return err
-	}
-
-	return nil
+func testResetData(key string) {
+	testResourceStorage[key].SetData(testData)
 }
 
 func testListResourcesByKey(key string) ([]storage.Resource, error) {

@@ -11,7 +11,7 @@ import (
 )
 
 // Delete operates as a http handler, to delete an existing resource.
-func Delete(storageSvc storage.Service) http.HandlerFunc {
+func Delete(storageSvc storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Read request path parameter id.
 		id := mux.Vars(r)["id"]

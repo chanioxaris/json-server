@@ -13,11 +13,11 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	randomKeyIndex := rand.Intn(len(pluralKeys))
-	randomKey := pluralKeys[randomKeyIndex]
+	randomKeyIndex := rand.Intn(len(testResourceKeys))
+	randomKey := testResourceKeys[randomKeyIndex]
 
-	randomResourceIndex := rand.Intn(len(testData[randomKey].([]storage.Resource)))
-	randomResource := testData[randomKey].([]storage.Resource)[randomResourceIndex]
+	randomResourceIndex := rand.Intn(len(testData[randomKey]))
+	randomResource := testData[randomKey][randomResourceIndex]
 
 	type bodyError struct {
 		Error string `json:"error"`
@@ -83,9 +83,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		if err := testResetData(fileName); err != nil {
-			t.Fatal(err)
-		}
+		testResetData(tt.key)
 
 		url := fmt.Sprintf("%s/%s", mockServer.URL, tt.key)
 
@@ -119,11 +117,7 @@ func TestCreate(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			expectedData := make([]storage.Resource, len(testData[randomKey].([]storage.Resource)))
-			copy(expectedData, testData[randomKey].([]storage.Resource))
-			expectedData = append(expectedData, got)
-
-			if !reflect.DeepEqual(resources, expectedData) {
+			if expectedData := testData[randomKey]; !reflect.DeepEqual(resources, expectedData) {
 				t.Fatalf("expected data %v, but got %v", expectedData, resources)
 			}
 		} else {

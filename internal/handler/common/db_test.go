@@ -25,9 +25,7 @@ func TestDB(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		if err := testResetData(fileName); err != nil {
-			t.Fatal(err)
-		}
+		testResetData("db")
 
 		url := fmt.Sprintf("%s/db", mockServer.URL)
 

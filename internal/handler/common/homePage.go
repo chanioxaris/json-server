@@ -89,7 +89,7 @@ const homePageTemplate = `
 `
 
 // HomePage renders the home page template with useful information about generated endpoints and resources.
-func HomePage(resourceStorage map[string]storage.Service) http.HandlerFunc {
+func HomePage(resourceStorage map[string]storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		t, err := template.New("home").Parse(homePageTemplate)
 		if err != nil {

@@ -11,7 +11,7 @@ import (
 )
 
 // Read operates as a http handler, to return the requested resource by id.
-func Read(storageSvc storage.Service) http.HandlerFunc {
+func Read(storageSvc storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Read request path parameter id.
 		id := mux.Vars(r)["id"]

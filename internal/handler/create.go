@@ -10,7 +10,7 @@ import (
 )
 
 // Create operates as a http handler, to add a new resource.
-func Create(storageSvc storage.Service) http.HandlerFunc {
+func Create(storageSvc storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Read and decode request body.
 		var newResource storage.Resource

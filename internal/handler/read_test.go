@@ -12,11 +12,11 @@ import (
 )
 
 func TestRead_Plural(t *testing.T) {
-	randomPluralKeyIndex := rand.Intn(len(pluralKeys))
-	randomPluralKey := pluralKeys[randomPluralKeyIndex]
+	randomPluralKeyIndex := rand.Intn(len(testResourceKeys))
+	randomPluralKey := testResourceKeys[randomPluralKeyIndex]
 
-	randomResourceIndex := rand.Intn(len(testData[randomPluralKey].([]storage.Resource)))
-	randomResource := testData[randomPluralKey].([]storage.Resource)[randomResourceIndex]
+	randomResourceIndex := rand.Intn(len(testData[randomPluralKey]))
+	randomResource := testData[randomPluralKey][randomResourceIndex]
 
 	type bodyError struct {
 		Error string `json:"error"`
@@ -49,6 +49,8 @@ func TestRead_Plural(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
+		testResetData(tt.key)
+
 		url := fmt.Sprintf("%s/%s/%s", mockServer.URL, tt.key, tt.id)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)

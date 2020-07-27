@@ -12,7 +12,7 @@ import (
 )
 
 // Replace operates as a http handler, to replace an existing resource.
-func Replace(storageSvc storage.Service) http.HandlerFunc {
+func Replace(storageSvc storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Read request path parameter id.
 		id := mux.Vars(r)["id"]

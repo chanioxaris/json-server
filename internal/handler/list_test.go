@@ -12,8 +12,8 @@ import (
 )
 
 func TestList(t *testing.T) {
-	randomKeyIndex := rand.Intn(len(pluralKeys))
-	randomKey := pluralKeys[randomKeyIndex]
+	randomKeyIndex := rand.Intn(len(testResourceKeys))
+	randomKey := testResourceKeys[randomKeyIndex]
 
 	testCases := []struct {
 		name         string
@@ -30,9 +30,7 @@ func TestList(t *testing.T) {
 	}
 
 	for _, tt := range testCases {
-		if err := testResetData(fileName); err != nil {
-			t.Fatal(err)
-		}
+		testResetData(tt.key)
 
 		url := fmt.Sprintf("%s/%s", mockServer.URL, tt.key)
 

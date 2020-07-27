@@ -170,11 +170,11 @@ func getResourceKeys(filename string) ([]string, error) {
 	return resourceKeys, nil
 }
 
-func createResourceStorage(resourceKeys []string, file string) (map[string]storage.Service, error) {
-	resourceStorage := make(map[string]storage.Service)
+func createResourceStorage(resourceKeys []string, filename string) (map[string]storage.Storage, error) {
+	resourceStorage := make(map[string]storage.Storage)
 
 	for _, resourceKey := range resourceKeys {
-		storageSvc, err := storage.New(file, resourceKey)
+		storageSvc, err := storage.NewFile(filename, resourceKey)
 		if err != nil {
 			return nil, errFailedInitResources
 		}
@@ -183,7 +183,7 @@ func createResourceStorage(resourceKeys []string, file string) (map[string]stora
 	}
 
 	// Create storage service for common db endpoint.
-	storageSvcDB, err := storage.New(file, "")
+	storageSvcDB, err := storage.NewFile(filename, "")
 	if err != nil {
 		return nil, errFailedInitResources
 	}

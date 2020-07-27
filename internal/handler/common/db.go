@@ -10,7 +10,7 @@ import (
 )
 
 // DB operates as a http handler, to list db content.
-func DB(storageSvc storage.Service) http.HandlerFunc {
+func DB(storageSvc storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		data, err := storageSvc.DB()
 		if err != nil {
