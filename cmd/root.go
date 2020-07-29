@@ -26,6 +26,7 @@ func newRootCmd() *cobra.Command {
 
 	// Add sub commands to base command.
 	rootCmd.AddCommand(newStartCmd())
+	rootCmd.AddCommand(newVersionCmd())
 
 	return rootCmd
 }
