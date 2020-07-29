@@ -39,7 +39,7 @@ Create a `db.json` file with your desired data
     
 Start JSON Server
 
-`go run main.go`
+`go run main.go start`
 
 If you navigate to http://localhost:8080/posts/1, you will get
 
@@ -70,15 +70,15 @@ When doing requests, it's good to know that:
 ## Parameters
 - You can specify an alternative port with the flag `-p` or `--port`. Default value is `3000`.
 
-`go run main.go -p 4000`
+`go run main.go start -p 4000`
 
 - You can specify an alternative file with the flag `-f` or `--file`. Default value is `db.json`.
 
-`go run main.go -f example.json`
+`go run main.go start -f example.json`
 
 - You can toggle http request logs with the flag `-l` or `--logs`. Default value is `false`.
 
-`go run main.go -l`
+`go run main.go start -l`
 
 ## License
 
