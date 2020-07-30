@@ -188,18 +188,15 @@ func createResourceStorage(resourceKeys []string, filename string) (map[string]s
 }
 
 func displayInfo(resourceKeys []string, port string) {
-	fmt.Println("JSON Server successfully running")
-	fmt.Println()
+	fmt.Printf("JSON Server successfully running\n\n")
 
 	fmt.Println("Resources")
 	for _, resource := range resourceKeys {
 		fmt.Printf("http://localhost:%s/%s\n", port, resource)
 	}
 
-	fmt.Printf("http://localhost:%s/db\n", port)
-	fmt.Println()
+	fmt.Printf("http://localhost:%s/db\n\n", port)
 
 	fmt.Println("Home")
-	fmt.Printf("http://localhost:%s\n", port)
-	fmt.Println()
+	fmt.Printf("http://localhost:%s\n\n", port)
 }

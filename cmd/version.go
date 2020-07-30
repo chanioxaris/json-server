@@ -7,12 +7,12 @@ import (
 )
 
 var (
-	version   string
-	goVersion string
-	gitCommit string
-	builtDate string
-	builtOS   string
-	builtArch string
+	version   = "unknown"
+	goVersion = "unknown"
+	gitCommit = "unknown"
+	builtDate = "unknown"
+	builtOS   = "unknown"
+	builtArch = "unknown"
 )
 
 func newVersionCmd() *cobra.Command {
@@ -26,13 +26,12 @@ func newVersionCmd() *cobra.Command {
 
 	return versionCmd
 }
-
 func runVersion(_ *cobra.Command, _ []string) error {
-	fmt.Println(fmt.Sprintf("Version:\t %s", version))
-	fmt.Println(fmt.Sprintf("Go version:\t %s", goVersion))
-	fmt.Println(fmt.Sprintf("Git commit:\t %s", gitCommit))
-	fmt.Println(fmt.Sprintf("Built:\t\t %s", builtDate))
-	fmt.Println(fmt.Sprintf("OS/Arch:\t %s/%s", builtOS, builtArch))
+	fmt.Printf("Version:\t %s\n", version)
+	fmt.Printf("Go version:\t %s\n", goVersion)
+	fmt.Printf("Git commit:\t %s\n", gitCommit)
+	fmt.Printf("Built:\t\t %s\n", builtDate)
+	fmt.Printf("OS/Arch:\t %s/%s\n", builtOS, builtArch)
 
 	return nil
 }
