@@ -1,0 +1,71 @@
+project_name: json-server
+
+before:
+  hooks:
+    - go mod download
+
+builds:
+  -
+    id: json-server_linux
+    binary: json-server
+    ldflags:
+    - -s -w
+    - -X github.com/chanioxaris/json-server/cmd.version={{.Version}}
+    - -X github.com/chanioxaris/json-server/cmd.goVersion={{.Env.GO_VERSION}}
+    - -X github.com/chanioxaris/json-server/cmd.gitCommit={{.ShortCommit}}
+    - -X github.com/chanioxaris/json-server/cmd.builtDate={{.Date}}
+    - -X github.com/chanioxaris/json-server/cmd.builtOS={{.Os}}
+    - -X github.com/chanioxaris/json-server/cmd.builtArch={{.Arch}}
+    goos:
+      - linux
+    goarch:
+      - 386
+      - amd64
+  - id: json-server_windows
+    binary: json-server
+    ldflags:
+      - -s -w
+      - -X github.com/chanioxaris/json-server/cmd.version={{.Version}}
+      - -X github.com/chanioxaris/json-server/cmd.goVersion={{.Env.GO_VERSION}}
+      - -X github.com/chanioxaris/json-server/cmd.gitCommit={{.ShortCommit}}
+      - -X github.com/chanioxaris/json-server/cmd.builtDate={{.Date}}
+      - -X github.com/chanioxaris/json-server/cmd.builtOS={{.Os}}
+      - -X github.com/chanioxaris/json-server/cmd.builtArch={{.Arch}}
+    goos:
+      - windows
+    goarch:
+      - 386
+      - amd64
+  -
+    id: json-server_macos
+    binary: json-server
+    ldflags:
+      - -s -w
+      - -X github.com/chanioxaris/json-server/cmd.version={{.Version}}
+      - -X github.com/chanioxaris/json-server/cmd.goVersion={{.Env.GO_VERSION}}
+      - -X github.com/chanioxaris/json-server/cmd.gitCommit={{.ShortCommit}}
+      - -X github.com/chanioxaris/json-server/cmd.builtDate={{.Date}}
+      - -X github.com/chanioxaris/json-server/cmd.builtOS={{.Os}}
+      - -X github.com/chanioxaris/json-server/cmd.builtArch={{.Arch}}
+    goos:
+      - darwin
+    goarch:
+      - 386
+      - amd64
+
+archives:
+  -
+    wrap_in_directory: true
+    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    replacements:
+      darwin: macOS
+      amd64: 64bit
+      386: 32bit
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
