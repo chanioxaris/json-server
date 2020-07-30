@@ -26,6 +26,7 @@ func newVersionCmd() *cobra.Command {
 
 	return versionCmd
 }
+
 func runVersion(_ *cobra.Command, _ []string) error {
 	fmt.Printf("Version:\t %s\n", version)
 	fmt.Printf("Go version:\t %s\n", goVersion)
