@@ -12,8 +12,7 @@ your development process when an API you depend on, doesn't exist or isn't compl
 Inspired from [json-server](https://github.com/typicode/json-server) javascript package.
 
 ## Executables
-Cross-platform (Windows, Linux, macOS) binaries are available to [download](https://github.com/chanioxaris/json-server/releases/latest) 
-for the latest release. Select the executable that match your OS and run json-server without any dependencies, with 
+Cross-platform (Windows, Linux, macOS) binaries are available for [download](https://github.com/chanioxaris/json-server/releases/latest). Select the executable that match your Operating System and run json-server without any dependencies, with 
 minimum effort.
 
 ## Getting started
