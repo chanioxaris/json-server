@@ -4,7 +4,10 @@
 [![codecov](https://codecov.io/gh/chanioxaris/json-server/branch/master/graph/badge.svg)](https://codecov.io/gh/chanioxaris/json-server)
 [![goreportcard](https://goreportcard.com/badge/github.com/chanioxaris/json-server)](https://goreportcard.com/report/github.com/chanioxaris/json-server)
 
-Create a dummy REST API from a json file with zero coding in seconds. Inspired from [json-server](https://github.com/typicode/json-server) javascript package.
+Create a dummy REST API from a json file with zero coding in seconds. Helps you to continue
+your development process when an API you depend on, doesn't exist or isn't complete yet. 
+
+Inspired from [json-server](https://github.com/typicode/json-server) javascript package.
 
 ## Getting started
 Get the package
@@ -41,7 +44,7 @@ Start JSON Server
 
 `go run main.go start`
 
-If you navigate to http://localhost:8080/posts/1, you will get
+If you navigate to http://localhost:3000/posts/1, you will get
 
     { 
       "id": "1", 
@@ -79,6 +82,10 @@ When doing requests, it's good to know that:
 - You can toggle http request logs with the flag `-l` or `--logs`. Default value is `false`.
 
 `go run main.go start -l`
+
+## Contributing
+
+Contributions to this project are welcomed. For more information see the [contribution guidelines](CONTRIBUTING.md).
 
 ## License
 
