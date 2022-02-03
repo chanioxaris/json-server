@@ -89,6 +89,13 @@ When doing requests, it's good to know that:
 
 `go run main.go start -l`
 
+ - Disable CORS. To allow access from any host (not secure) `-a` or `--allorigins`. Default value is `false`.
+
+This adds the header "Access-Control-Allow-Origin: *" which tells the browser to allow from any origin.
+
+`go run main.go start -a`
+
+
 ## Known issues
 - For users running **macOS Catalina** and newer versions, apple will prevent binary from run as it hasn't been notarized 
 and signed. To overcome this issue, you can [add a security exception](https://support.apple.com/en-us/HT202491) 
