@@ -18,6 +18,7 @@ func Setup(resourceStorage map[string]storage.Storage) http.Handler {
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(middleware.Recovery)
 	router.Use(middleware.Logger)
+	router.Use(middleware.CorsAllowAll)
 
 	// For each resource create the appropriate endpoint handlers.
 	for resourceKey, storageSvc := range resourceStorage {
