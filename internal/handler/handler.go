@@ -32,6 +32,7 @@ func Setup(resourceStorage map[string]storage.Storage, allow_all bool) http.Hand
 		}
 
 		// Register all default endpoint handlers for resource.
+		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), Options(storageSvc)).Methods(http.MethodOptions)
 		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), List(storageSvc)).Methods(http.MethodGet)
 		router.HandleFunc(fmt.Sprintf("/%s/{id}", resourceKey), Read(storageSvc)).Methods(http.MethodGet)
 		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), Create(storageSvc)).Methods(http.MethodPost)
