@@ -11,6 +11,7 @@ import (
 	"github.com/chanioxaris/json-server/internal/handler/common"
 	"github.com/chanioxaris/json-server/internal/storage"
 	"github.com/chanioxaris/json-server/internal/web/middleware"
+	"github.com/rs/cors"
 )
 
 // Setup API handler based on provided resources.
@@ -19,7 +20,7 @@ func Setup(resourceStorage map[string]storage.Storage, allow_all bool) http.Hand
 	router.Use(middleware.Recovery)
 	router.Use(middleware.Logger)
 	if allow_all {
-		router.Use(middleware.CorsAllowAll)
+		router.Use(cors.AllowAll().Handler)
 	}
 
 	// For each resource create the appropriate endpoint handlers.
