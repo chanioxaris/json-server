@@ -20,7 +20,21 @@ func Setup(resourceStorage map[string]storage.Storage, allow_all bool) http.Hand
 	router.Use(middleware.Recovery)
 	router.Use(middleware.Logger)
 	if allow_all {
-		router.Use(cors.AllowAll().Handler)
+		corsHandler := cors.New(cors.Options{
+			AllowedOrigins: []string{"*"},
+			AllowedMethods: []string{
+				http.MethodHead,
+				http.MethodGet,
+				http.MethodPost,
+				http.MethodPut,
+				http.MethodPatch,
+				http.MethodDelete,
+			},
+			AllowedHeaders:     []string{"*"},
+			AllowCredentials:   false,
+			OptionsPassthrough: false,
+		})
+		router.Use(corsHandler.Handler)
 	}
 
 	// For each resource create the appropriate endpoint handlers.
@@ -33,6 +47,7 @@ func Setup(resourceStorage map[string]storage.Storage, allow_all bool) http.Hand
 
 		// Register all default endpoint handlers for resource.
 		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), Options(storageSvc)).Methods(http.MethodOptions)
+		router.HandleFunc(fmt.Sprintf("/%s/{id}", resourceKey), Options(storageSvc)).Methods(http.MethodOptions)
 		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), List(storageSvc)).Methods(http.MethodGet)
 		router.HandleFunc(fmt.Sprintf("/%s/{id}", resourceKey), Read(storageSvc)).Methods(http.MethodGet)
 		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), Create(storageSvc)).Methods(http.MethodPost)
