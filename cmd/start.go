@@ -50,6 +50,9 @@ Please note that only array data type resources are supported`,
 	// Optional flag to enable logs.
 	startCmd.Flags().BoolP("logs", "l", false, "Enable logs")
 
+	// Optional flag to allow all origins
+	startCmd.Flags().BoolP("allorigins", "a", false, "Allow any Origin ie 'Access-Control-Allow-Origin: *' in the header")
+
 	return startCmd
 }
 
@@ -72,6 +75,11 @@ func runStart(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("%w: logs", errFailedParseFlag)
 	}
 
+	allorigins, err := cmd.Flags().GetBool("allorigins")
+	if err != nil {
+		return fmt.Errorf("%w: logs", errFailedParseFlag)
+	}
+
 	// Setup logger.
 	logger.Setup(logs)
 
@@ -90,7 +98,7 @@ func runStart(cmd *cobra.Command, _ []string) error {
 	// Setup API server.
 	api := &http.Server{
 		Addr:    ":" + port,
-		Handler: handler.Setup(resourceStorage),
+		Handler: handler.Setup(resourceStorage, allorigins),
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,

@@ -11,13 +11,31 @@ import (
 	"github.com/chanioxaris/json-server/internal/handler/common"
 	"github.com/chanioxaris/json-server/internal/storage"
 	"github.com/chanioxaris/json-server/internal/web/middleware"
+	"github.com/rs/cors"
 )
 
 // Setup API handler based on provided resources.
-func Setup(resourceStorage map[string]storage.Storage) http.Handler {
+func Setup(resourceStorage map[string]storage.Storage, allow_all bool) http.Handler {
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(middleware.Recovery)
 	router.Use(middleware.Logger)
+	if allow_all {
+		corsHandler := cors.New(cors.Options{
+			AllowedOrigins: []string{"*"},
+			AllowedMethods: []string{
+				http.MethodHead,
+				http.MethodGet,
+				http.MethodPost,
+				http.MethodPut,
+				http.MethodPatch,
+				http.MethodDelete,
+			},
+			AllowedHeaders:     []string{"*"},
+			AllowCredentials:   false,
+			OptionsPassthrough: false,
+		})
+		router.Use(corsHandler.Handler)
+	}
 
 	// For each resource create the appropriate endpoint handlers.
 	for resourceKey, storageSvc := range resourceStorage {
@@ -28,6 +46,8 @@ func Setup(resourceStorage map[string]storage.Storage) http.Handler {
 		}
 
 		// Register all default endpoint handlers for resource.
+		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), Options(storageSvc)).Methods(http.MethodOptions)
+		router.HandleFunc(fmt.Sprintf("/%s/{id}", resourceKey), Options(storageSvc)).Methods(http.MethodOptions)
 		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), List(storageSvc)).Methods(http.MethodGet)
 		router.HandleFunc(fmt.Sprintf("/%s/{id}", resourceKey), Read(storageSvc)).Methods(http.MethodGet)
 		router.HandleFunc(fmt.Sprintf("/%s", resourceKey), Create(storageSvc)).Methods(http.MethodPost)
